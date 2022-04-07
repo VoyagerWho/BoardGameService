@@ -1,72 +1,53 @@
+var express = require("express");
+var app = express();
+var bodyParser = require('body-parser');
+//var fs = require("fs");
+
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.json());
+
+app.get("/", function (req, res) {
+    res.sendFile("TicTacToeFiles/TicTacToe.html", {root: __dirname });
+});
+
+app.get("/basicStyles.css", function (req, res) {
+    res.sendFile("TicTacToeFiles/basicStyles.css", {root: __dirname });
+});
+
+app.get("/TicTacToe.js", function (req, res) {
+    res.sendFile("TicTacToeFiles/TicTacToe.js", {root: __dirname });
+});
+
+//-----------------------------------------------------------------------------
+// Game engine
+//-----------------------------------------------------------------------------
+
 /**
  * Array representing game board
  * @type {Array<number>}
  */
-var board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-/**
- * Number representing last player
- * @type {number}
- */
-var player = 1;
-
-/**
- * Number representing player who started last round
- * @type {number}
- */
- var playerBegin = 1;
+ var board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
  /**
- * Array representing game score as 
- * [wins of player 1, ties, wins of player 2]
- * @type {Array<number>}
- */
-var score = [0, 0, 0];
+  * Number representing last player
+  * @type {number}
+  */
+ var player = 1;
+ 
+ /**
+  * Number representing player who started last round
+  * @type {number}
+  */
+  var playerBegin = 1;
+ 
+  /**
+  * Array representing game score as 
+  * [wins of player 1, ties, wins of player 2]
+  * @type {Array<number>}
+  */
+ var score = [0, 0, 0];
 
-var test;
-
-function onBodyLoad()
-{
-    updateGUI();
-    document.getElementById("btnRuch").onclick = function()
-    {
-        var move = document.getElementById("textRuch").value;
-        document.getElementById("textRuch").value="";
-        updateGame(player, move);
-    };
-    document.getElementById("canvas").onclick = function(e)
-    {
-        test = e;
-        console.log("offx: " + e.offsetX + "; offy: " + e.offsetY);
-    };
-}
-
-function updateGUI()
-{
-    for(var i=0; i<3; ++i)
-    {
-        var row = document.getElementById("brow" + i);
-        for(var j=0; j<3; ++j)
-        {
-            cell = row.getElementsByTagName("td")[j];
-            switch(board[3*i+j])
-            {
-                case 0:
-                    cell.innerText = " ";
-                break;
-                case 1:
-                    cell.innerText = "O";
-                break;
-                case 2:
-                    cell.innerText = "X";
-                break;
-            }
-        }
-    }
-    document.getElementById("score").innerHTML=score.toString();
-}
-
-// TicTacToe game engine logic - serwer side
+ // TicTacToe game engine logic - serwer side
 /**
  * Function to initialize new game
  * clearing previous' game status
@@ -227,7 +208,40 @@ function updateGame(playerId, position)
     } 
 }
 
+//-----------------------------------------------------------------------------
+// Game engine API
+//-----------------------------------------------------------------------------
+
+app.post("/NewGame", function(req, res){
+    startNewGame();
+    res.send("New game started!");
+});
+
+app.post("/NewRound", function(req, res){
+    startNewRound();
+    res.send("New round started!");
+});
+
+app.post("/Move", function(req, res){
+    console.log(req.body);
+    res.send("WIP");
+});
+
+app.post("/Update", function(req, res){
+    res.send("WIP");
+});
+
+//-----------------------------------------------------------------------------
+
+var server = app.listen(1107, function () {
+        var host = server.address().address;
+        var port = server.address().port;
+        console.log("Example app listening at http://%s:%s", host, port);
+});
+
+//-----------------------------------------------------------------------------
 // Unit tests
+//-----------------------------------------------------------------------------
 
 function testCheckIfDraw()
 {
@@ -383,5 +397,13 @@ function runTests()
     testCheckIfDraw();
     testCheckIfWon();
     testMakeMove();
+    startNewGame();
 }
+
+app.get("/Tests", function(req, res){
+    runTests();
+    res.send("Done!");
+});
+
+//-----------------------------------------------------------------------------
 
