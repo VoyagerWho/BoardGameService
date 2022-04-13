@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pl">
+    <%- include("./partials/head.ejs") %>
+    <body>
+        <div id="navigation">
+            <%- include("./partials/nav.ejs") %> 
+        </div>
+        <div id="backgroundBox">
+            <div id="foregroundBox">
+                &nbsp;
+                <section id="pageHeader">
+                    <%- include("./partials/header.ejs") %> 
+                </section>
+                <br />
+                <section id="middle">
+                    <% if (locals.middle) { %>
+                        <% const path =  "./partials/"+(locals.middle)+".ejs"; %> 
+                        <%- include(path) %> 
+                    <% } %>
+                </section> 
+                <%- include("./partials/footer.ejs") %> 
+            </div>
+        </div>
+        <div id="extras">
+        <img src="/static/Logo.gif" alt="Logo" />
+        <% if (locals.network) { %>
+            <p>
+                <a href="http://jigsaw.w3.org/css-validator/check/referer">
+                        <img style="border:0;width:88px;height:31px"
+                                src="http://jigsaw.w3.org/css-validator/images/vcss-blue"
+                                alt="Poprawny CSS!" />
+                        </a>
+            </p>
+        <% } %>
+        </div>
+        </body>
+</html>

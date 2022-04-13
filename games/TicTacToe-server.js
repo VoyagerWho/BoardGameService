@@ -3,7 +3,7 @@ var app = express();
 var bodyParser = require('body-parser');
 //var fs = require("fs");
 
-app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 app.get("/", function (req, res) {
@@ -69,6 +69,22 @@ function startNewRound()
     board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     playerBegin = playerBegin%2+1;
     player = playerBegin;
+}
+/**
+ * Function to get current state of the game
+ * @param {number} uid - Id of user { 0 - observer, >0 - players}
+ * @returns {object} json representation of game state
+ */
+function getUpdate(uid)
+{
+    if(typeof(uid) == "number")
+    {
+        return {
+            board: board,
+            score: score
+        };
+    }
+    return {};
 }
 
 /**
@@ -184,8 +200,10 @@ function makeMove(playerId, position)
  */
 function updateGame(playerId, position)
 {
+    var move = {};
     if(makeMove(playerId, position))
     {
+        move.accepted = true;
         if(checkIfWon())
         {
             console.log("Player " + player + " won!");
@@ -193,19 +211,23 @@ function updateGame(playerId, position)
                 ++score[0];
             else
                 ++score[2];
-            startNewRound();
+            move.playerWon = player;
         }
             
         if(checkIfDraw())
         {
             console.log("Draw!");
                 ++score[1];
-            startNewRound();
+            move.draw = true;
         }
-        player = playerId%2+1;   
-        updateGUI();
-
-    } 
+        player = playerId%2+1;
+        
+    }
+    else
+    {
+        move.accepted = false;
+    }
+    return move;
 }
 
 //-----------------------------------------------------------------------------
@@ -214,21 +236,71 @@ function updateGame(playerId, position)
 
 app.post("/NewGame", function(req, res){
     startNewGame();
-    res.send("New game started!");
+    var resjson = {};
+    resjson.message = "New game started!";
+    res.send(resjson);
 });
 
 app.post("/NewRound", function(req, res){
     startNewRound();
-    res.send("New round started!");
+    var resjson = {};
+    resjson.message = "New round started!";
+    res.send(resjson);
 });
 
 app.post("/Move", function(req, res){
+    var pid = null;
+    var ppos = null;
     console.log(req.body);
-    res.send("WIP");
+    if(req.body.data === undefined)
+    {
+        pid = req.body.player;
+        ppos = req.body.move;
+    }
+    else
+    {
+        var reqjson = {};
+        try
+        {
+            reqjson = JSON.parse(req.body.data);
+        } 
+        catch (error) 
+        {
+            console.error(error);
+        }
+        console.log(reqjson);
+        pid = reqjson.player;
+        ppos = reqjson.move;
+    }
+    
+    var resjson = updateGame(pid, ppos);
+    res.send(resjson);
 });
 
 app.post("/Update", function(req, res){
-    res.send("WIP");
+    var uid = null;
+    console.log(req.body);
+    if(req.body.data === undefined)
+    {
+        uid = req.body.uid;
+    }
+    else
+    {
+        var reqjson = {};
+        try
+        {
+            reqjson = JSON.parse(req.body.data);
+        } 
+        catch (error) 
+        {
+            console.error(error);
+        }
+        console.log(reqjson);
+        uid = reqjson.uid;
+    }
+    
+    var resjson = getUpdate(uid);
+    res.send(resjson);
 });
 
 //-----------------------------------------------------------------------------

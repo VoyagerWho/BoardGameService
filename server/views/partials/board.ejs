@@ -1,0 +1,7 @@
+<script src="/static/<%= locals.game.name%>.js"></script>
+<header id="gameName"><%= locals.game.name %></header>
+<div id="gameBoard">
+    <% const path =  "./"+(locals.game.name)+".ejs"; %> 
+    <%- include(path) %> 
+</div>
+<footer id="gameFooter"><%= locals.game.description%></footer>
