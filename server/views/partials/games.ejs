@@ -1,0 +1,41 @@
+<header>List of registered games</header>
+<div id="gamesList">
+    <ul>
+        <% locals.games.forEach((game, index) => { %>
+            <li class="game">
+                <form action="/rooms/games/check/<%= index %>" method="get">
+                    <%= game.name %>
+                    <input type="submit" value="Sprawdź dostępność" /><br />
+                    Description:<br /><%= game.description %>
+                </form>
+            </li>
+        <% }) %>
+    </ul>
+</div>
+<footer id="newGame">
+    <script>
+        function checkGame(form)
+        {
+            xmlhttpPost("/games/check", {url: form.url.value}, function (response){
+                var resjson = JSON.parse(response);
+                console.log(resjson);
+                if (resjson.accepted)
+                {
+                    document.getElementById("gameResponse").innerHTML = "Game is OK!";
+                }
+                else
+                {
+                    document.getElementById("gameResponse").innerHTML = "Error has occured!";
+                }
+            });
+        }
+    </script>
+    Zarejestruj nową grę
+    <form action="/rooms/games/register" method="post">
+        <label for="url">Adres serwera gry</label>
+        <input id="url" name="url" type="url" placeholder="http://localhost:8080/" value="<%= locals.url %> " />
+        <input type="button" value="Sprawdź" onclick="checkGame(this.form)" />
+        <input type="submit" value="Zarejestruj" />
+    </form>
+    <div id="gameResponse"></div>
+</footer>

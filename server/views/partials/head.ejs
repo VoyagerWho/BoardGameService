@@ -2,4 +2,8 @@
     <meta charset="utf-8" />
     <link rel="stylesheet" type="text/css" href="/static/basicStyles.css" />
     <title>Test <%= locals.text %></title>
+    <script src="/static/basicScripts.js"></script>
+    <% if (locals.game) { %>
+        <script src="/static/gameScripts.js"></script>
+    <% } %>
 </head>

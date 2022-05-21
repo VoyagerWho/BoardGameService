@@ -1,26 +1,41 @@
 const express = require("express");
 const gameAPI = require("./api/game");
 const path = require("path");
-const bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
+const session = require("express-session");
 const dbusersRouter = require("./routes/dbusers");
-const roomsRouter = require('./routes/rooms');
-
+const rooms = require("./routes/rooms");
+// const sessionParser = session({
+//     secret: "argen",
+//     resave: false,
+//     saveUninitialized: false
+// });
 var app = express();
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
 app.use("/static", express.static(path.join(__dirname, "resources")));
 app.use(logger);
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
+// app.use(sessionParser);
 
 app.use("/users", dbusersRouter);
-app.use("/rooms", roomsRouter);
+app.use("/rooms", rooms.router);
+app.use("/games", (req, res)=>
+{
+    res.redirect(307, "/rooms/games" + req.url);
+});
 
 app.get("/", middleware, (req, res) =>
 {
     res.render("index", {text: " EJS render!"});
     //res.redirect("new/url");
+});
+
+app.get("/session", (req, res)=>
+{
+    res.end(req.session.working);
 });
 
 app.get("/ttt", (req, res) =>
@@ -44,6 +59,12 @@ app.get("/ttt", (req, res) =>
     });
 });
 
+app.use((req, res, next)=>
+{
+    res.status(404);
+    res.render("index", {text: "404", middle: "error404"})    
+});
+
 
 function logger(req, res, next)
 {
@@ -56,14 +77,25 @@ function middleware(req, res, next)
     console.log("Middleware example");
     next();   
 }
-
-var server = app.listen(80, function () {
-        var host = server.address().address;
-        var port = server.address().port;
-        console.log("Example app listening at http://%s:%s", host, port);
+// 192.168.25.12
+// 192.168.25.15
+var server = app.listen(80, () => 
+{
+    var host = server.address().address;
+    var port = server.address().port;
+    console.log("Example app listening at http://%s:%s", host, port);
 });
 
-server.on("close", () => {
+server.on("close", () => 
+{
     client.close();
     console.log('DB Disconnetced!');
+});
+
+server.on('upgrade', (request, socket, head) => 
+{
+    rooms.wsServer.handleUpgrade(request, socket, head, socket => 
+    {
+        rooms.wsServer.emit('connection', socket, request);
+    });
 });

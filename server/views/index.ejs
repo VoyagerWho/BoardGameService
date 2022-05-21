@@ -1,7 +1,15 @@
 <!DOCTYPE html>
 <html lang="pl">
     <%- include("./partials/head.ejs") %>
-    <body>
+    <body onload="
+    try 
+    {
+        onBodyLoad();
+    }
+    catch(err)
+    {
+        // 
+    }">
         <div id="navigation">
             <%- include("./partials/nav.ejs") %> 
         </div>

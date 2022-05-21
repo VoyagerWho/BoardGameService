@@ -26,28 +26,34 @@ app.get("/TicTacToe.js", function (req, res) {
  * Array representing game board
  * @type {Array<number>}
  */
- var board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+var board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
- /**
-  * Number representing last player
-  * @type {number}
-  */
- var player = 1;
- 
- /**
-  * Number representing player who started last round
-  * @type {number}
-  */
-  var playerBegin = 1;
- 
-  /**
-  * Array representing game score as 
-  * [wins of player 1, ties, wins of player 2]
-  * @type {Array<number>}
-  */
- var score = [0, 0, 0];
+/**
+ * Number representing last player
+ * @type {number}
+ */
+var player = 1;
 
- // TicTacToe game engine logic - serwer side
+/**
+ * Number representing player who started last round
+ * @type {number}
+ */
+var playerBegin = 1;
+
+/**
+ * Array representing game score as 
+ * [wins of player 1, ties, wins of player 2]
+ * @type {Array<number>}
+ */
+var score = [0, 0, 0];
+
+/**
+ * Flag wheter game is running
+ * @type {Boolean}
+ */
+var gameActive = false;
+
+// TicTacToe game engine logic - serwer side
 /**
  * Function to initialize new game
  * clearing previous' game status
@@ -58,6 +64,7 @@ function startNewGame()
     player = 1;
     playerBegin = 1;
     score = [0, 0, 0];
+    gameActive = true;
 }
 
 /**
@@ -69,6 +76,7 @@ function startNewRound()
     board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     playerBegin = playerBegin%2+1;
     player = playerBegin;
+    gameActive = true;
 }
 /**
  * Function to get current state of the game
@@ -161,6 +169,8 @@ function makeMove(playerId, position)
 {
     try 
     {
+        if(!gameActive)
+            throw "Game inactive!"
         if(typeof(position) !="string" || typeof(playerId) != "number")
             throw "Incorrect parameter type!";
         
@@ -190,7 +200,8 @@ function makeMove(playerId, position)
     catch (error)
     {
         console.error(error); 
-    }      
+    }
+    return false;     
 }
 
 /**
@@ -212,6 +223,7 @@ function updateGame(playerId, position)
             else
                 ++score[2];
             move.playerWon = player;
+            gameActive = false;
         }
             
         if(checkIfDraw())
@@ -219,6 +231,7 @@ function updateGame(playerId, position)
             console.log("Draw!");
                 ++score[1];
             move.draw = true;
+            gameActive = false;
         }
         player = playerId%2+1;
         
@@ -238,6 +251,7 @@ app.post("/NewGame", function(req, res){
     startNewGame();
     var resjson = {};
     resjson.message = "New game started!";
+    resjson.accepted = true;
     res.send(resjson);
 });
 
@@ -245,6 +259,7 @@ app.post("/NewRound", function(req, res){
     startNewRound();
     var resjson = {};
     resjson.message = "New round started!";
+    resjson.accepted = true;
     res.send(resjson);
 });
 
@@ -300,15 +315,8 @@ app.post("/Update", function(req, res){
     }
     
     var resjson = getUpdate(uid);
+    resjson.accepted = true;
     res.send(resjson);
-});
-
-//-----------------------------------------------------------------------------
-
-var server = app.listen(1107, function () {
-        var host = server.address().address;
-        var port = server.address().port;
-        console.log("Example app listening at http://%s:%s", host, port);
 });
 
 //-----------------------------------------------------------------------------
@@ -479,3 +487,39 @@ app.get("/Tests", function(req, res){
 
 //-----------------------------------------------------------------------------
 
+var server = app.listen(1107, function () {
+    var host = server.address().address;
+    var port = server.address().port;
+    console.log("Example app listening at http://%s:%s", host, port);
+});
+
+const description = {
+    name: "TicTacToe",
+    hostname: server.address().address,
+    port: server.address().port,
+    description: "Dwuosobowa gra  planszowa w kółko i krzyżyk",
+    maxNoPlayers: 2,
+    board: {
+        type: "table",
+        rowCount: 3,
+        rowLabels: "d",
+        columnCount: 3,
+        columnLabels: "l"
+    },
+    api: {
+        "NewGame": "/NewGame",
+        "NewRound": "/NewRound",
+        "Move": "/Move",
+        "Update": "/Update"
+    }
+}
+
+app.route("/api").get((req,res)=>
+{
+    res.send(description);
+    res.end();
+}).post((req, res)=>
+{
+    res.send(description);
+    res.end();
+});

@@ -1,6 +1,10 @@
 const express = require("express")
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, Db } = require('mongodb');
 const router = express.Router();
+/**
+ * DB connection
+ * @type {Db}
+ */
 var db;
 const dbname = "GameDB";
 const uri = "mongodb+srv://9klimowski:pass9klimowski@gameservice.g3luw.mongodb.net/GameDB?retryWrites=true&w=majority";

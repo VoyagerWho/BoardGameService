@@ -1,7 +1,74 @@
-<script src="/static/<%= locals.game.name%>.js"></script>
 <header id="gameName"><%= locals.game.name %></header>
 <div id="gameBoard">
-    <% const path =  "./"+(locals.game.name)+".ejs"; %> 
-    <%- include(path) %> 
+    <% const board = locals.game.board
+    switch (board.type) {
+        case "table":
+            {
+                var orl = 0;
+                var ocl = 0;
+                switch (board.rowLabels) {
+                    case "d":
+                        orl = 49;
+                        break;
+                    case "l":
+                        orl = 97;
+                        break;
+                }
+                switch (board.columnLabels) {
+                    case "d":
+                        ocl = 49;
+                        break;
+                    case "l":
+                        ocl = 97;
+                        break;
+                }
+                if (orl > 0 && ocl > 0)
+                {
+                    %>
+                    <table id="board">
+                        <tbody>
+                            <tr>
+                                <th></th>
+                    <%
+                    for (var i = 0; i < board.columnCount; ++i)
+                    { %>
+                        <th><%= String.fromCharCode(ocl+i) %></th>  
+                    <% } %>
+                            </tr>
+                    <%
+                    for (var i = 0; i < board.rowCount; ++i)
+                    { %>
+                        <tr id="brow<%= i%>">
+                        <th><%= String.fromCharCode(orl+i)%></th>
+                        <%
+                        for (var j = 0; j < board.columnCount; ++j)
+                        {%>
+                            <td onclick="makeMove('<%= String.fromCharCode(ocl+j) + String.fromCharCode(orl+i)%>')"></td> 
+                        <% } %> 
+                        </tr>
+                        <%
+                    } %>
+                        </tbody>
+                    </table>
+                    <form id="ruch">
+                        <input type="button" id="btnGame" value="Nowa Gra" />
+                        <input type="button" id="btnRound" value="Nowa Runda" />
+                    </form>
+                    <div id="score">
+                    </div>
+                    <%
+                }
+                else
+                {
+                    %>Nie znany rodzaj numeracji!<%
+                }
+
+            }break;
+
+        default:
+            {
+                %>Nie znany rodzaj planszy!<%
+            }break;
+    }%> 
 </div>
 <footer id="gameFooter"><%= locals.game.description%></footer>

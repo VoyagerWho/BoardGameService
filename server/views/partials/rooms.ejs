@@ -1,0 +1,24 @@
+<header>List of active rooms</header>
+<div id="roomsList">
+    <ul>
+        <% locals.rooms.forEach((room, index) => { %>
+            <li class="room">
+                <form action="/rooms/<%= index %>" method="get">
+                    <%= room.game.name %>
+                    <input type="submit" value="Dołącz" /><br />
+                    Description:<br /><%= room.game.description %>
+                </form>
+            </li>
+        <% }) %>
+    </ul>
+</div>
+<footer id="newRoom">
+    <form action="/rooms/open" method="post">
+        <select name="gameId">
+            <% locals.games.forEach((game, index) => { %>
+                <option value="<%= index %>" ><%= game.name %> </option>
+            <% }) %>
+        </select>
+        <input type="submit" value="Otwórz" />
+    </form>
+</footer>
