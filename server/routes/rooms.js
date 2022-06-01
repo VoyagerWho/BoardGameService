@@ -22,7 +22,7 @@ if(debugMode)
     games.push({
         name: "TicTacToe",
         hostname: '::',
-        port: 1107,
+        port: 8080,
         description: "Dwuosobowa gra  planszowa w kółko i krzyżyk",
         maxNoPlayers: 2,
         board: {
@@ -33,10 +33,10 @@ if(debugMode)
             columnLabels: "l"
         },
         api: {
-            "NewGame": "/NewGame",
-            "NewRound": "/NewRound",
-            "Move": "/Move",
-            "Update": "/Update"
+            "NewGame": "/tictactoe/NewGame",
+            "NewRound": "/tictactoe/NewRound",
+            "Move": "/tictactoe/Move",
+            "Update": "/tictactoe/Update"
         }
     });
 

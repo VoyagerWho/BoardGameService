@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const dbusersRouter = require("./routes/dbusers");
 const rooms = require("./routes/rooms");
+const tictactoe = require("../games/TicTacToe-server");
 // const sessionParser = session({
 //     secret: "argen",
 //     resave: false,
@@ -22,6 +23,7 @@ app.use(bodyParser.json());
 
 app.use("/users", dbusersRouter);
 app.use("/rooms", rooms.router);
+app.use("/tictactoe", tictactoe.router);
 app.use("/games", (req, res)=>
 {
     res.redirect(307, "/rooms/games" + req.url);
@@ -79,10 +81,10 @@ function middleware(req, res, next)
 }
 // 192.168.25.12
 // 192.168.25.15
-var server = app.listen(80, () => 
+const port = process.env.PORT || process.argv[2] || 8080;
+var server = app.listen(port, () => 
 {
     var host = server.address().address;
-    var port = server.address().port;
     console.log("Example app listening at http://%s:%s", host, port);
 });
 

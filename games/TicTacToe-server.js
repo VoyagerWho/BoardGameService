@@ -1,5 +1,5 @@
 var express = require("express");
-var app = express();
+var app = express.Router();
 var bodyParser = require('body-parser');
 //var fs = require("fs");
 
@@ -7,16 +7,9 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 app.get("/", function (req, res) {
-    res.sendFile("TicTacToeFiles/TicTacToe.html", {root: __dirname });
+    res.redirect("/tictactoe/api");
 });
 
-app.get("/basicStyles.css", function (req, res) {
-    res.sendFile("TicTacToeFiles/basicStyles.css", {root: __dirname });
-});
-
-app.get("/TicTacToe.js", function (req, res) {
-    res.sendFile("TicTacToeFiles/TicTacToe.js", {root: __dirname });
-});
 
 //-----------------------------------------------------------------------------
 // Game engine
@@ -487,16 +480,20 @@ app.get("/Tests", function(req, res){
 
 //-----------------------------------------------------------------------------
 
-var server = app.listen(1107, function () {
-    var host = server.address().address;
-    var port = server.address().port;
-    console.log("Example app listening at http://%s:%s", host, port);
-});
+// var server = app.listen(1107, function () {
+//     var host = server.address().address;
+//     var port = server.address().port;
+//     console.log("Example app listening at http://%s:%s", host, port);
+// });
+
+//const hostname = "localhost";
+const hostname = "boardgameservice-argen.herokuapp.com";
+const port = process.env.PORT || process.argv[2] || 8080;
 
 const description = {
     name: "TicTacToe",
-    hostname: server.address().address,
-    port: server.address().port,
+    hostname: hostname,
+    port: port,
     description: "Dwuosobowa gra  planszowa w kółko i krzyżyk",
     maxNoPlayers: 2,
     board: {
@@ -507,10 +504,10 @@ const description = {
         columnLabels: "l"
     },
     api: {
-        "NewGame": "/NewGame",
-        "NewRound": "/NewRound",
-        "Move": "/Move",
-        "Update": "/Update"
+        "NewGame": "/tictactoe/NewGame",
+        "NewRound": "/tictactoe/NewRound",
+        "Move": "/tictactoe/Move",
+        "Update": "/tictactoe/Update"
     }
 }
 
@@ -523,3 +520,5 @@ app.route("/api").get((req,res)=>
     res.send(description);
     res.end();
 });
+
+module.exports.router = app;
