@@ -25,7 +25,7 @@ const games = [];
 const rooms = [];
 
 //---------------------------------------------------------------------
-const debugMode = true;
+const debugMode = false;
 if(debugMode)
 {
     games.push({
