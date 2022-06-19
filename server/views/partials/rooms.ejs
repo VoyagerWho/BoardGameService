@@ -1,16 +1,50 @@
-<header>List of active rooms</header>
+<header>Lista aktywnych pokoi</header>
 <div id="roomsList">
-    <ul>
-        <% locals.rooms.forEach((room, index) => { %>
-            <li class="room">
-                <form action="/rooms/<%= index %>" method="get">
-                    <%= room.game.name %>
-                    <input type="submit" value="Dołącz" /><br />
-                    Description:<br /><%= room.game.description %>
-                </form>
-            </li>
-        <% }) %>
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>Nazwa gry</th>
+                <th>Opis</th>
+                <th>Liczba graczy <br />Liczba obserwatorów</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <% locals.rooms.forEach((room, index) => { %>
+                <tr class="room">
+                    <th>
+                        <%= room.game.name %>
+                    </th>
+                    <td>
+                        <%= room.game.description %>
+                    </td>
+                    <td>
+                        <%= room.noPlayers %> / <%= room.maxNoPlayers %><br />
+                        <%= room.noObservers%>
+                    </td>
+                    <td>
+                        <form action="/rooms/<%= index %>" method="get">
+                            
+                            <input type="submit" value="Dołącz" 
+                            <% if (room.noPlayers >= room.maxNoPlayers) { %>
+                             disabled
+                            <% } %>
+                            /><br />
+                            
+                        </form>
+                    </td>
+                    <td>
+                        <form action="/rooms/<%= index %>/Observe" method="get">
+                            
+                            <input type="submit" value="Obserwuj" /><br />
+                            
+                        </form>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
 </div>
 <footer id="newRoom">
     <form action="/rooms/open" method="post">

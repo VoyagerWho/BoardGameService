@@ -1,16 +1,31 @@
-<header>List of registered games</header>
+<header>Lista zarejestrowanych gier</header>
 <div id="gamesList">
-    <ul>
-        <% locals.games.forEach((game, index) => { %>
-            <li class="game">
-                <form action="/rooms/games/check/<%= index %>" method="get">
-                    <%= game.name %>
-                    <input type="submit" value="Sprawdź dostępność" /><br />
-                    Description:<br /><%= game.description %>
-                </form>
-            </li>
-        <% }) %>
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>Nazwa gry</th>
+                <th>Opis</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <% locals.games.forEach((game, index) => { %>
+                <tr class="game">
+                    <th>
+                        <%= game.name %>
+                    </th>
+                    <td>
+                        <%= game.description %>
+                    </td>
+                    <td>
+                        <form action="/rooms/games/check/<%= index %>" method="get">
+                            <input type="submit" value="Sprawdź dostępność" /><br />
+                        </form>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
 </div>
 <footer id="newGame">
     <script>
@@ -33,7 +48,7 @@
     Zarejestruj nową grę
     <form action="/rooms/games/register" method="post">
         <label for="url">Adres serwera gry</label>
-        <input id="url" name="url" type="url" placeholder="http://localhost:8080/" value="<%= locals.url %> " />
+        <input id="url" name="url" type="url" placeholder="https://gra.io/" value="<%= locals.url %> " />
         <input type="button" value="Sprawdź" onclick="checkGame(this.form)" />
         <input type="submit" value="Zarejestruj" />
     </form>

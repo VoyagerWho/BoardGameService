@@ -1,15 +1,24 @@
 const express = require("express");
-const session = require("express-session");
 const bodyParser = require("body-parser");
 const router = express.Router();
 const gameAPI = require("../api/game");
 const ws = require('ws');
 
-const sessionParser = session({
-    secret: "argen",
-    resave: true,
-    saveUninitialized: true
-});
+/**
+ * App session instance
+ * @type {express.RequestHandler}
+ */
+var sessionParser;
+
+/**
+ * Function to pass main express session instance to router
+ * @param {express.RequestHandler} sp 
+ */
+function passSessionParser(sp)
+{
+    sessionParser = sp;
+    router.use(sessionParser);
+}
 
 const games = [];
 
@@ -186,7 +195,6 @@ wsServer.on("connection", (socket, req) =>
 
 router.use(bodyParser.urlencoded({extended:false}));
 router.use(bodyParser.json());
-router.use(sessionParser);
 router.get("/", (req, res) =>
 {
     req.session.working = "yes!";
@@ -327,6 +335,17 @@ router.get("/:id", (req, res) =>
         res.redirect("/rooms");
 });
 
+router.get("/:id/Observe", (req, res) =>
+{
+    if(rooms[req.params.id])
+    {
+        req.session.uid = 0;
+        res.redirect("/rooms/"+ req.params.id);
+    }
+    else
+        res.redirect("/rooms");
+});
+
 router.post("/:id/NewGame", (req, res) =>
 {
     gameAPI.startNewGame(rooms[req.params.id].game, null, httpres =>
@@ -398,3 +417,4 @@ router.param("name", (req, res, next, param) =>
 
 module.exports.router = router;
 module.exports.wsServer = wsServer;
+module.exports.passSessionParser = passSessionParser;

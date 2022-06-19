@@ -6,11 +6,11 @@ const session = require("express-session");
 const dbusersRouter = require("./routes/dbusers");
 const rooms = require("./routes/rooms");
 const tictactoe = require("../games/TicTacToe-server");
-// const sessionParser = session({
-//     secret: "argen",
-//     resave: false,
-//     saveUninitialized: false
-// });
+const sessionParser = session({
+    secret: "argen",
+    resave: false,
+    saveUninitialized: false
+});
 var app = express();
 
 app.set("view engine", "ejs");
@@ -19,7 +19,8 @@ app.use("/static", express.static(path.join(__dirname, "resources")));
 app.use(logger);
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
-// app.use(sessionParser);
+app.use(sessionParser);
+rooms.passSessionParser(sessionParser)
 
 app.use("/users", dbusersRouter);
 app.use("/rooms", rooms.router);

@@ -58,23 +58,12 @@ nav{
 }
 
 #middle{
-	min-height: 50vh;
-	border: 1px solid peru;
+	min-height: 50%;
 }
 
 
 h1{
     color: peru;
-}
-
-table, td, th{
-    border: 1px solid #aaa;
-}
-
-td, th{
-    min-width: 2em;
-    min-height: 2em;
-    text-align: center;
 }
 
 a{
@@ -103,7 +92,17 @@ table{
 td, th{
     border: 1px solid black;
     padding: 3px;
-    background-color: #808080;
+    background-color: #606060;
+}
+
+.board{
+    border: 1px solid #aaa;
+}
+
+.boardsquare{
+    min-width: 2em;
+    min-height: 2em;
+    text-align: center;
 }
 
 form{

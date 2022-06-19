@@ -493,7 +493,7 @@ const port = process.env.PORT || process.argv[2] || 8080;
 const description = {
     name: "TicTacToe",
     hostname: hostname,
-    port: port,
+    port: 443,
     description: "Dwuosobowa gra  planszowa w kółko i krzyżyk",
     maxNoPlayers: 2,
     board: {
