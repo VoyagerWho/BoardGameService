@@ -9,7 +9,7 @@ var player = 1;
  */
 var room = {id: 0};
 
-var socket = new WebSocket("wss://"+document.location.host);
+var socket = new WebSocket("ws://"+document.location.host);
 
 socket.onopen = function(e) {
     alert("[open] Connection established");

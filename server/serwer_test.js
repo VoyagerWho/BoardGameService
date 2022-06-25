@@ -82,8 +82,8 @@ function middleware(req, res, next)
 }
 // 192.168.25.12
 // 192.168.25.15
-const port = process.env.PORT || process.argv[2] || 8080;
-var server = app.listen(port, () => 
+const port = process.env.PORT || process.argv[2] || 80;
+var server = app.listen(port, "192.168.25.12", () => 
 {
     var host = server.address().address;
     console.log("Example app listening at http://%s:%s", host, port);

@@ -25,13 +25,14 @@ const games = [];
 const rooms = [];
 
 //---------------------------------------------------------------------
-const debugMode = false;
+const debugMode = true;
 if(debugMode)
 {
     games.push({
         name: "TicTacToe",
-        hostname: '::',
-        port: 8080,
+        //hostname: '::',
+        hostname: "192.168.25.12",
+        port: 80,
         description: "Dwuosobowa gra  planszowa w kółko i krzyżyk",
         maxNoPlayers: 2,
         board: {
@@ -253,9 +254,9 @@ router.post("/games/register", (req, res) =>
     console.log(req.body);
     const gameUrl = req.body.url;
     var resjson = {};
-    gameAPI.httpRequest(gameUrl, null, httpres=>
+    gameAPI.httpRequest(gameUrl, null, httpsres=>
     {
-        httpres.on("data", d =>
+        httpsres.on("data", d =>
         {
             try {
                 resjson = JSON.parse(d.toString());
@@ -289,9 +290,9 @@ router.post("/games/check", (req, res) =>
     const gameUrl = req.body.url;
     var resjson = {};
     console.log("Sending request...");
-    gameAPI.httpRequest(gameUrl, null, httpres=>
+    gameAPI.httpRequest(gameUrl, null, httpsres=>
     {
-        httpres.on("data", d =>
+        httpsres.on("data", d =>
         {
             try {
                 resjson = JSON.parse(d.toString());
@@ -348,9 +349,9 @@ router.get("/:id/Observe", (req, res) =>
 
 router.post("/:id/NewGame", (req, res) =>
 {
-    gameAPI.startNewGame(rooms[req.params.id].game, null, httpres =>
+    gameAPI.startNewGame(rooms[req.params.id].game, null, httpsres =>
     {
-        httpres.on("data", d =>
+        httpsres.on("data", d =>
         {
             const resjson = JSON.parse(d.toString());
             console.log(resjson);
@@ -362,9 +363,9 @@ router.post("/:id/NewGame", (req, res) =>
 
 router.post("/:id/NewRound", (req, res) =>
 {
-    gameAPI.startNewRound(rooms[req.params.id].game, null, httpres =>
+    gameAPI.startNewRound(rooms[req.params.id].game, null, httpsres =>
     {
-        httpres.on("data", d =>
+        httpsres.on("data", d =>
         {
             const resjson = JSON.parse(d.toString());
             console.log(resjson);
@@ -378,9 +379,9 @@ router.post("/:id/Move", (req, res) =>
 {
     console.log("Recived:");
     console.log(req.body);
-    gameAPI.makeMove(rooms[req.params.id].game, req.body, httpres =>
+    gameAPI.makeMove(rooms[req.params.id].game, req.body, httpsres =>
     {
-        httpres.on("data", d =>
+        httpsres.on("data", d =>
         {
             const resjson = JSON.parse(d.toString());
             console.log("Sent:");
@@ -396,9 +397,9 @@ router.post("/:id/Update", (req, res) =>
     console.log("Recived:");
     console.log(req.body);
     //gameAPI.updateAll(rooms[req.params.id]);
-    gameAPI.update(rooms[req.params.id].game, req.body, httpres =>
+    gameAPI.update(rooms[req.params.id].game, req.body, httpsres =>
     {
-        httpres.on("data", d =>
+        httpsres.on("data", d =>
         {
             const resjson = JSON.parse(d.toString());
             console.log("Sent:");

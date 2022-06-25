@@ -1,4 +1,4 @@
-const http = require("http");
+const https = require("https");
 
 const exampleOptions = {
     hostname: 'localhost',
@@ -12,17 +12,17 @@ const exampleOptions = {
 };
 
 /**
- * Function to send http request
- * @param {string | URL | http.RequestOptions} options
+ * Function to send https request
+ * @param {string | URL | https.RequestOptions} options
  * @param {*} data
- * @param {(res: http.IncomingMessage) => void} responseHandler
+ * @param {(res: https.IncomingMessage) => void} responseHandler
  * @param {(err: Error) => void} errorHandler 
  */
-function httpRequest(options, data, responseHandler, errorHandler)
+function httpsRequest(options, data, responseHandler, errorHandler)
 {
     if(!errorHandler)
         errorHandler = function(err){console.error(err);};
-    var httpsreq = http.request(options, responseHandler);
+    var httpsreq = https.request(options, responseHandler);
     httpsreq.on("error", errorHandler);
     if(data)
         httpsreq.write(data);
@@ -45,9 +45,9 @@ function httpRequest(options, data, responseHandler, errorHandler)
  * }
  * 
  * @param {JSON} game - game api description
- * @returns {http.RequestOptions} 
+ * @returns {https.RequestOptions} 
  */
-function getHttpOptionsForGame(game)
+function getHttpsOptionsForGame(game)
 {
     var options = {
         path: '/',
@@ -66,7 +66,7 @@ function getHttpOptionsForGame(game)
  * Function handling command `NewGame`
  * @param {JSON} game - game api description
  * @param {JSON} data - data to send
- * @param {(res: http.IncomingMessage) => void} responseHandler
+ * @param {(res: https.IncomingMessage) => void} responseHandler
  * @param {(err: Error) => void} errorHandler 
  */
 const startNewGame = (data, responseHandler, errorHandler) => sendCommand("NewGame", data, responseHandler, errorHandler);
@@ -75,7 +75,7 @@ const startNewGame = (data, responseHandler, errorHandler) => sendCommand("NewGa
  * Function handling command `NewRound`
  * @param {JSON} game - game api description
  * @param {JSON} data - data to send
- * @param {(res: http.IncomingMessage) => void} responseHandler
+ * @param {(res: https.IncomingMessage) => void} responseHandler
  * @param {(err: Error) => void} errorHandler 
  */
 const startNewRound = (data, responseHandler, errorHandler) => sendCommand("NewRound", data, responseHandler, errorHandler);
@@ -84,7 +84,7 @@ const startNewRound = (data, responseHandler, errorHandler) => sendCommand("NewR
  * Function handling command `Move`
  * @param {JSON} game - game api description
  * @param {JSON} data - data to send
- * @param {(res: http.IncomingMessage) => void} responseHandler
+ * @param {(res: https.IncomingMessage) => void} responseHandler
  * @param {(err: Error) => void} errorHandler 
  */
 const makeMove = (data, responseHandler, errorHandler) => sendCommand("Move", data, responseHandler, errorHandler);
@@ -93,14 +93,14 @@ const makeMove = (data, responseHandler, errorHandler) => sendCommand("Move", da
  * Function handling command `Update`
  * @param {JSON} game - game api description
  * @param {JSON} data - data to send
- * @param {(res: http.IncomingMessage) => void} responseHandler
+ * @param {(res: https.IncomingMessage) => void} responseHandler
  * @param {(err: Error) => void} errorHandler 
  */
 const update = (data, responseHandler, errorHandler) => sendCommand("Update", data, responseHandler, errorHandler)
 
 function sendCommand(command, game, data, responseHandler, errorHandler)
 {
-    var options = getHttpOptionsForGame(game);
+    var options = getHttpsOptionsForGame(game);
     options.path=game.api[command];
     if(data)
     {
@@ -108,7 +108,7 @@ function sendCommand(command, game, data, responseHandler, errorHandler)
         data = JSON.stringify(data);
         options.headers["Content-Length"]=data.length;
     }
-    httpRequest(options, data, responseHandler, errorHandler);
+    httpsRequest(options, data, responseHandler, errorHandler);
 }
 
 /**
@@ -117,22 +117,22 @@ function sendCommand(command, game, data, responseHandler, errorHandler)
  */
 function updateAll(room)
 {
-    var options = getHttpOptionsForGame(room.game);
+    var options = getHttpsOptionsForGame(room.game);
     options.path=room.game.api["Update"];
     var data;
     room.players.forEach((player, index) => 
     {
         data = JSON.stringify({uid: index+1});
         options.headers["Content-Length"]=data.length;
-        httpRequest(options, data, res=>
+        httpsRequest(options, data, res=>
             {
                 res.on("data", d =>
                 {
-                    const httpres = JSON.parse(d.toString());
+                    const httpsres = JSON.parse(d.toString());
                     const resjson = {
                         accepted: true,
                         action: "Update",
-                        state: httpres
+                        state: httpsres
                     };
                     player.socket.send(JSON.stringify(resjson));
                 });
@@ -141,15 +141,15 @@ function updateAll(room)
     if (room.observers.length)
     {
         data = JSON.stringify({uid: 0});
-        httpRequest(options, data, res=>
+        httpsRequest(options, data, res=>
             {
                 res.on("data", d =>
                 {
-                    const httpres = JSON.parse(d.toString());
+                    const httpsres = JSON.parse(d.toString());
                     const resjson = {
                         accepted: true,
                         action: "Update",
-                        state: httpres
+                        state: httpsres
                     };
                     room.observers.forEach((observer)=>
                     {
@@ -162,7 +162,7 @@ function updateAll(room)
     
 }
 
-module.exports.httpRequest = httpRequest;
+module.exports.httpsRequest = httpsRequest;
 module.exports.startNewGame = startNewGame;
 module.exports.startNewRound = startNewRound;
 module.exports.makeMove = makeMove;
