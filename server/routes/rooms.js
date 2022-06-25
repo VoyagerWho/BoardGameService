@@ -254,7 +254,7 @@ router.post("/games/register", (req, res) =>
     console.log(req.body);
     const gameUrl = req.body.url;
     var resjson = {};
-    gameAPI.httpRequest(gameUrl, null, httpsres=>
+    gameAPI.httpsRequest(gameUrl, null, httpsres=>
     {
         httpsres.on("data", d =>
         {
@@ -290,7 +290,7 @@ router.post("/games/check", (req, res) =>
     const gameUrl = req.body.url;
     var resjson = {};
     console.log("Sending request...");
-    gameAPI.httpRequest(gameUrl, null, httpsres=>
+    gameAPI.httpsRequest(gameUrl, null, httpsres=>
     {
         httpsres.on("data", d =>
         {
