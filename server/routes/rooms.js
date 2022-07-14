@@ -20,46 +20,17 @@ function passSessionParser(sp)
     router.use(sessionParser);
 }
 
+function customLog(toLog)
+{
+    console.log("--------------------------------"); 
+    console.log("Room router:");
+    console.log(toLog);
+}
+
 const games = [];
 
 const rooms = [];
 
-//---------------------------------------------------------------------
-const debugMode = true;
-if(debugMode)
-{
-    games.push({
-        name: "TicTacToe",
-        //hostname: '::',
-        hostname: "192.168.25.12",
-        port: 80,
-        description: "Dwuosobowa gra  planszowa w kółko i krzyżyk",
-        maxNoPlayers: 2,
-        board: {
-            type: "table",
-            rowCount: 3,
-            rowLabels: "d",
-            columnCount: 3,
-            columnLabels: "l"
-        },
-        api: {
-            "NewGame": "/tictactoe/NewGame",
-            "NewRound": "/tictactoe/NewRound",
-            "Move": "/tictactoe/Move",
-            "Update": "/tictactoe/Update"
-        }
-    });
-
-    rooms.push({
-        game: games[0],
-        noPlayers: 0,
-        maxNoPlayers: games[0].maxNoPlayers,
-        noObservers: 0,
-        players: [],
-        observers: []
-    });
-}
-//---------------------------------------------------------------------
 var sockets = new Map();
 var lastSocketId = 0;
 const wsServer = new ws.Server({ noServer: true });
@@ -133,7 +104,7 @@ function handleMessage(socket, messjson)
         }break;
         default:
         {
-            console.log("Unknow action: " + messjson.action);
+            customLog("Unknow action: " + messjson.action);
             socket.send(JSON.stringify({accepted: false, response: "Unknow action: " + messjson.action}));
         }break;
     }    
@@ -141,29 +112,29 @@ function handleMessage(socket, messjson)
 wsServer.on("connection", (socket, req) =>
 {
     // sessionParser(socket.upgradeReq, {}, function(){
-    //     console.log("New websocket connection:");
+    //     customLog("New websocket connection:");
     //     const sess = req.upgradeReq.session;
-    //     console.log("working = " + sess.working);
+    //     customLog("working = " + sess.working);
     // });
     sessionParser(req, {}, ()=>
     {
-        console.log("New websocket connection:");
+        customLog("New websocket connection:");
         req.session.websocketdata = {mess: "I am listening!"};
         req.session.payload = {mess: "Oncomming storm"};
-        //req.session.save((err)=>console.log(err));
-        console.log(req.session);
-        console.log("working = " + req.session.working);
+        //req.session.save((err)=>customLog(err));
+        customLog(req.session);
+        customLog("working = " + req.session.working);
     });
     
-    console.log("Socket conneted!");
+    customLog("Socket conneted!");
     socket.mapKey = lastSocketId;
     sockets.set(lastSocketId, socket);
     ++lastSocketId;
-    sockets.forEach((v, k)=>{console.log(k + " -> " + v.mapKey)});
+    sockets.forEach((v, k)=>{customLog(k + " -> " + v.mapKey)});
     socket.on("message", message => 
     {
         req.session.payload = {mess: "Oncomming storm"};
-        console.log(req.session);
+        customLog(req.session);
         req.session.save();
         var messjson = {};
         try {
@@ -171,13 +142,13 @@ wsServer.on("connection", (socket, req) =>
         } catch (error) {
             messjson = {message: message.toString()};
         }
-        console.log(messjson);
+        customLog(messjson);
         handleMessage(socket, messjson);
     });
 
     socket.on("close",(code, reason)=>
     {
-        console.log("Socket disconneted!");
+        customLog("Socket disconneted!");
         const rid = socket.roomStats.roomsId;
         const uid = socket.roomStats.uid;
         if(uid === 0)
@@ -242,16 +213,15 @@ router.post("/open", (req, res) =>
         res.redirect("/rooms");
         return;
     }
-    console.log("Room opened");
     openRoom(games[req.body.gameId]);
-    console.log(rooms);
+    customLog(["Room opened", rooms]);
     res.redirect("/rooms");
 }); 
 
 
 router.post("/games/register", (req, res) =>
 {
-    console.log(req.body);
+    customLog(req.body);
     const gameUrl = req.body.url;
     var resjson = {};
     gameAPI.httpsRequest(gameUrl, null, httpsres=>
@@ -261,15 +231,13 @@ router.post("/games/register", (req, res) =>
             try {
                 resjson = JSON.parse(d.toString());
             } catch (error) {
-                console.log("Received:");
-                console.log(d.toString());
+                customLog(["Received Error:", d.toString()]);
                 resjson.accepted = false;
                 res.redirect("/games");
                 return;
             }
             
-            console.log("Received:");
-            console.log(resjson);
+            customLog(["Received:", resjson]);
             // game parsing
             games.push(resjson);
             res.redirect("/games");
@@ -277,7 +245,7 @@ router.post("/games/register", (req, res) =>
     }, 
     err=>
     {
-        console.log(err);
+        customLog(err);
         resjson = {
             accepted: false
         };
@@ -289,7 +257,7 @@ router.post("/games/check", (req, res) =>
 {
     const gameUrl = req.body.url;
     var resjson = {};
-    console.log("Sending request...");
+    customLog("Sending request...");
     gameAPI.httpsRequest(gameUrl, null, httpsres=>
     {
         httpsres.on("data", d =>
@@ -297,16 +265,14 @@ router.post("/games/check", (req, res) =>
             try {
                 resjson = JSON.parse(d.toString());
             } catch (error) {
-                console.log("Received:");
-                console.log(d.toString());
+                customLog(["Received Error:", d.toString()]);
                 resjson.accepted = false;
                 res.json(resjson);
                 res.end();
                 return;
             }
             
-            console.log("Received and sent:");
-            console.log(resjson);
+            customLog(["Received and sent:", resjson]);
             resjson.accepted = true;
             res.json(resjson);
             res.end();
@@ -314,7 +280,7 @@ router.post("/games/check", (req, res) =>
     }, 
     err=>
     {
-        console.log(err);
+        customLog(err);
         resjson = {
             accepted: false
         };
@@ -354,7 +320,7 @@ router.post("/:id/NewGame", (req, res) =>
         httpsres.on("data", d =>
         {
             const resjson = JSON.parse(d.toString());
-            console.log(resjson);
+            customLog(resjson);
             res.json(resjson);
         })
     });
@@ -368,7 +334,7 @@ router.post("/:id/NewRound", (req, res) =>
         httpsres.on("data", d =>
         {
             const resjson = JSON.parse(d.toString());
-            console.log(resjson);
+            customLog(resjson);
             res.json(resjson);
         })
     });
@@ -377,15 +343,15 @@ router.post("/:id/NewRound", (req, res) =>
 
 router.post("/:id/Move", (req, res) =>
 {
-    console.log("Recived:");
-    console.log(req.body);
+    customLog("Recived:");
+    customLog(req.body);
     gameAPI.makeMove(rooms[req.params.id].game, req.body, httpsres =>
     {
         httpsres.on("data", d =>
         {
             const resjson = JSON.parse(d.toString());
-            console.log("Sent:");
-            console.log(resjson);
+            customLog("Sent:");
+            customLog(resjson);
             res.json(resjson);
         });
     });
@@ -394,16 +360,14 @@ router.post("/:id/Move", (req, res) =>
 
 router.post("/:id/Update", (req, res) =>
 {
-    console.log("Recived:");
-    console.log(req.body);
+    customLog(["Recived:",req.body]);
     //gameAPI.updateAll(rooms[req.params.id]);
     gameAPI.update(rooms[req.params.id].game, req.body, httpsres =>
     {
         httpsres.on("data", d =>
         {
             const resjson = JSON.parse(d.toString());
-            console.log("Sent:");
-            console.log(resjson);
+            customLog(["Sent:",resjson]);
             res.json(resjson);
         })
     });
@@ -412,7 +376,7 @@ router.post("/:id/Update", (req, res) =>
 // runs every time on param
 router.param("name", (req, res, next, param) =>
 {
-    console.log(param);
+    customLog(param);
     next();
 });
 

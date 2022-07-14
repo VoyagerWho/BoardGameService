@@ -30,7 +30,7 @@ app.use("/games", (req, res)=>
     res.redirect(307, "/rooms/games" + req.url);
 });
 
-app.get("/", middleware, (req, res) =>
+app.get("/", (req, res) =>
 {
     res.render("index", {text: " EJS render!"});
     //res.redirect("new/url");
@@ -52,11 +52,11 @@ app.get("/ttt", (req, res) =>
     options.headers["Content-Length"]=data.length;
     gameAPI.httpRequest(options, data, httpres =>
     {
-        console.log(`Server status code: ${httpres.statusCode}`);
+        customLog(`Server status code: ${httpres.statusCode}`);
         httpres.on("data", d =>
         {
             const resjson = JSON.parse(d.toString());
-            console.log(resjson);
+            customLog(resjson);
             res.json(resjson);
         });
     });
@@ -68,31 +68,29 @@ app.use((req, res, next)=>
     res.render("index", {text: "404", middle: "error404"})    
 });
 
+function customLog(toLog)
+{
+    console.log("--------------------------------"); 
+    console.log("Main server:");
+    console.log(toLog);  
+}
 
 function logger(req, res, next)
 {
-    console.log("URL: " + req.originalUrl);
+    console.log("\nURL: " + req.originalUrl);
     next();   
 }
 
-function middleware(req, res, next)
-{
-    console.log("Middleware example");
-    next();   
-}
-// 192.168.25.12
-// 192.168.25.15
 const port = process.env.PORT || process.argv[2] || 80;
 var server = app.listen(port, () => 
 {
-    var host = server.address().address;
-    console.log("Example app listening at http://%s:%s", host, port);
+    customLog("App listening");
 });
 
 server.on("close", () => 
 {
     client.close();
-    console.log('DB Disconnetced!');
+    customLog('DB Disconnetced!');
 });
 
 server.on('upgrade', (request, socket, head) => 

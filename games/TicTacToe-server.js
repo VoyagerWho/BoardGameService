@@ -5,6 +5,13 @@ var bodyParser = require('body-parser');
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
+app.use(logger);
+
+function logger(req, res, next)
+{
+    console.log("TTT: " + req.originalUrl);
+    next();   
+}
 
 app.get("/", function (req, res) {
     res.redirect("/tictactoe/api");
@@ -480,15 +487,7 @@ app.get("/Tests", function(req, res){
 
 //-----------------------------------------------------------------------------
 
-// var server = app.listen(1107, function () {
-//     var host = server.address().address;
-//     var port = server.address().port;
-//     console.log("Example app listening at http://%s:%s", host, port);
-// });
-
-//const hostname = "localhost";
 const hostname = "boardgameservice-argen.herokuapp.com";
-const port = process.env.PORT || process.argv[2] || 8080;
 
 const description = {
     name: "TicTacToe",
