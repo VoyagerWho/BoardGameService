@@ -7,7 +7,7 @@ const dbusersRouter = require("./routes/dbusers");
 const rooms = require("./routes/rooms");
 const tictactoe = require("../games/TicTacToe-server");
 const sessionParser = session({
-    secret: "argen",
+    secret: process.env.sessionSecret,
     resave: false,
     saveUninitialized: false
 });
