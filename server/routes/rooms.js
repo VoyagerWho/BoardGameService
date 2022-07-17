@@ -26,10 +26,41 @@ function customLog(toLog)
     console.log("Room router:");
     console.log(toLog);
 }
+const hostname = "boardgameservice-argen.herokuapp.com";
 
-const games = [];
+const games = [
+    {
+        name: "TicTacToe",
+        hostname: hostname,
+        port: 443,
+        description: "Dwuosobowa gra  planszowa w kółko i krzyżyk",
+        maxNoPlayers: 2,
+        board: {
+            type: "table",
+            rowCount: 3,
+            rowLabels: "d",
+            columnCount: 3,
+            columnLabels: "l"
+        },
+        api: {
+            "NewGame": "/tictactoe/NewGame",
+            "NewRound": "/tictactoe/NewRound",
+            "Move": "/tictactoe/Move",
+            "Update": "/tictactoe/Update"
+        }
+    }
+];
 
-const rooms = [];
+const rooms = [
+    {
+        game: games[0],
+        noPlayers: 0,
+        maxNoPlayers: 2,
+        noObservers: 0,
+        players: [],
+        observers: []
+    }
+];
 
 var sockets = new Map();
 var lastSocketId = 0;
