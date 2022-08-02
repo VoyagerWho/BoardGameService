@@ -1,145 +1,204 @@
 /**
- * XHR request
- * @type {XMLHttpRequest}
+ * Function to format log messages
+ * @param {any} toLog
  */
-var request;
-
-/**
- * Function to create new XHR object
- * @returns {XMLHttpRequest}
- */
-function getRequestObject()
-{
-	if ( window.ActiveXObject)
-	{
-		return ( new ActiveXObject("Microsoft.XMLHTTP"));
-	}
-	else if (window.XMLHttpRequest)
-	{
-		return (new XMLHttpRequest());
-	}
-	else
-	{
-		return (null);
-	}
+function customLog(toLog) {
+	console.log('--------------------------------');
+	console.log('TicTacToe Game Engine:');
+	console.log(toLog);
 }
 
+//-----------------------------------------------------------------------------
+// Game engine
+//-----------------------------------------------------------------------------
+
 /**
- * Function to send AJAX request via post method
- * @param {string} strURL 
- * @param {string} mess 
- * @param {Function} respFunc 
+ * Array representing game board
+ * @type {Array<number>}
  */
-function xmlhttpPost(strURL, mess, respFunc) {
-    var xhr = getRequestObject();
-    if (xhr !== null)
-    {
-        xhr.onreadystatechange = function() {
-            if(xhr.readyState == 4)
-            {
-                if(xhr.status == 200)
-                {    
-                   respFunc(xhr.responseText);
-                }
-                else if(xhr.status == 401)
-                {
-                   window.location.reload();
-                } 
-            }
-        };
-        xhr.open("POST", strURL);
-        xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
-        xhr.setRequestHeader("Content-Type","application/json; charset=UTF-8");
-        xhr.send(JSON.stringify(mess));  
-    }
-    else
-    {
-      console.error("XHR not available!");  
-    }       
-}
+var board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
 /**
- * Temporar holder of player id
+ * Number representing last player
  * @type {number}
  */
 var player = 1;
 
-function onBodyLoad()
-{
-    update();
-    document.getElementById("btnMove").onclick = function()
-    {
-        var move = document.getElementById("textMove").value;
-        if (move !== "")
-        {
-            document.getElementById("textMove").value="";
-            var reqjson = {};
-            reqjson.player = player;
-            reqjson.move = move;
-            xmlhttpPost("/Move", reqjson, function (response){
-                var resjson = JSON.parse(response);
-                console.log(resjson);
-                if (resjson.accepted)
-                {
-                    update();
-                    player = player%2+1;
-                }
-                
-            });
-        }
-    };
-    document.getElementById("btnGame").onclick = function()
-    {
-        xmlhttpPost("/NewGame", {}, function (response){
-            var resjson = JSON.parse(response);
-            console.log(resjson);
-            update();
-        });
-    };
-    document.getElementById("btnRound").onclick = function()
-    {
-        xmlhttpPost("/NewRound", {}, function (response){
-            var resjson = JSON.parse(response);
-            console.log(resjson);
-            update();
-        });
-    };
-    document.getElementById("canvas").onclick = function(e)
-    {
-        console.log("offx: " + e.offsetX + "; offy: " + e.offsetY);
-    };
+/**
+ * Number representing player who started last round
+ * @type {number}
+ */
+var playerBegin = 1;
+
+/**
+ * Array representing game score as
+ * [wins of player 1, ties, wins of player 2]
+ * @type {Array<number>}
+ */
+var score = [0, 0, 0];
+
+/**
+ * Flag wheter game is running
+ * @type {Boolean}
+ */
+var gameActive = false;
+
+/**
+ * Function to initialize new game
+ * clearing previous' game status
+ */
+function startNewGame() {
+	board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+	player = 1;
+	playerBegin = 1;
+	score = [0, 0, 0];
+	gameActive = true;
 }
 
-function update()
-{
-    var mess = {uid: player};
-    xmlhttpPost("/Update", mess, function (response){
-        var resjson = JSON.parse(response);
-        console.log(resjson);
-        updateGUI(resjson);
-    });
+/**
+ * Function to initialize new round
+ * clearing previous' round status
+ */
+function startNewRound() {
+	board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+	playerBegin = (playerBegin % 2) + 1;
+	player = playerBegin;
+	gameActive = true;
+}
+/**
+ * Function to get current state of the game
+ * @param {number} player - Id of user { 0 - observer, >0 - players}
+ * @returns {object} json representation of game state
+ */
+function getUpdate(player) {
+	if (typeof player == 'number') {
+		return {
+			board: board,
+			score: score,
+			state: gameActive,
+		};
+	}
+	return {};
 }
 
-function updateGUI(state)
-{
-    for(var i=0; i<3; ++i)
-    {
-        var row = document.getElementById("brow" + i);
-        for(var j=0; j<3; ++j)
-        {
-            cell = row.getElementsByTagName("td")[j];
-            switch(state.board[3*i+j])
-            {
-                case 0:
-                    cell.innerText = " ";
-                break;
-                case 1:
-                    cell.innerText = "O";
-                break;
-                case 2:
-                    cell.innerText = "X";
-                break;
-            }
-        }
-    }
-    document.getElementById("score").innerHTML=state.score.toString();
+/**
+ * Function to check if last move score victory
+ * @returns {boolean} true if player won, false otherwise
+ */
+function checkIfWon() {
+	const previous = (player % 2) + 1;
+	// 3 in row
+	for (var i = 0; i < 3; ++i) {
+		var line = true;
+		for (var j = 0; j < 3; ++j) {
+			if (board[3 * i + j] != player) {
+				line = false;
+				break;
+			}
+		}
+		if (line) return true;
+	}
+
+	// 3 in column
+	for (var i = 0; i < 3; ++i) {
+		var line = true;
+		for (var j = 0; j < 3; ++j) {
+			if (board[3 * j + i] != player) {
+				line = false;
+				break;
+			}
+		}
+		if (line) return true;
+	}
+
+	// check if middle
+	if (board[4] == player) {
+		// 3 in \
+		if (board[0] == player && board[8] == player) return true;
+		// 3 in /
+		if (board[2] == player && board[6] == player) return true;
+	}
+
+	return false;
 }
+
+/**
+ * Function to check if last move lead to draw
+ * @returns {boolean} true if draw, false otherwise
+ */
+function checkIfDraw() {
+	if (board.indexOf(0) >= 0) return false;
+	return true;
+}
+
+/**
+ * Function to make next move by player
+ * @param {number} playerId - Player id number 1 or 2
+ * @param {string} position - Move position example a1
+ * @returns {boolean} true if move is legal, false otherwise
+ */
+function makeMove(playerId, position) {
+	try {
+		if (!gameActive) throw 'Game inactive!';
+		if (typeof position != 'string' || typeof playerId != 'number')
+			throw 'Incorrect parameter type!';
+
+		if (playerId != player || (playerId != 1 && playerId != 2))
+			throw 'Wrong player id: ' + playerId;
+
+		var nocolumn = position.charCodeAt(0) - 'a'.charCodeAt(0);
+
+		if (nocolumn == NaN) throw 'Invalid position: ' + position;
+		if (nocolumn < 0 || nocolumn > 2)
+			throw 'Column index out of range: ' + nocolumn;
+
+		var norow = position.charCodeAt(1) - '1'.charCodeAt(0);
+
+		if (norow == NaN) throw 'Invalid position: ' + position;
+		if (norow < 0 || norow > 2) throw 'Row index out of range: ' + norow;
+
+		if (board[3 * norow + nocolumn] != 0) throw 'Invalid position: ' + position;
+
+		board[3 * norow + nocolumn] = playerId;
+		return true;
+	} catch (error) {
+		console.error(error);
+	}
+	return false;
+}
+
+/**
+ * Function to update game state
+ * @param {number} playerId - Player id number 1 or 2
+ * @param {string} position - Move position example a1
+ */
+function updateGame(playerId, position) {
+	var move = {};
+	if (makeMove(playerId, position)) {
+		move.accepted = true;
+		if (checkIfWon()) {
+			customLog('Player ' + player + ' won!');
+			if (player == 1) ++score[0];
+			else ++score[2];
+			move.playerWon = player;
+			gameActive = false;
+		}
+
+		if (checkIfDraw()) {
+			customLog('Draw!');
+			++score[1];
+			move.draw = true;
+			gameActive = false;
+		}
+		player = (playerId % 2) + 1;
+	} else {
+		move.accepted = false;
+	}
+	return move;
+}
+
+module.exports.startNewGame = startNewGame;
+module.exports.startNewRound = startNewRound;
+module.exports.getUpdate = getUpdate;
+module.exports.makeMove = makeMove;
+module.exports.updateGame = updateGame;
