@@ -208,6 +208,7 @@ wsServer.on('connection', (socket, req) => {
 	customLog('Socket conneted!');
 	sessionParser(req, {}, () => {
 		console.log('Session attached to socket');
+		console.log(req.session.rooms);
 		const rid = req.url.substring(7);
 		const room = rooms.get(rid);
 		var resjson = { action: 'GetRole' };
