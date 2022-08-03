@@ -8,9 +8,16 @@ const rooms = require('./routes/rooms');
 const tictactoe = require('../games/TicTacToe-server');
 const sessionParser = session({
 	secret: process.env.sessionSecret,
-	resave: false,
-	saveUninitialized: false,
+	resave: true,
+	saveUninitialized: true,
+	unset: 'destroy',
+	cookie: {
+		sameSite: 'Lax',
+		maxAge: 60000,
+		secure: true,
+	},
 });
+
 var app = express();
 
 app.set('view engine', 'ejs');
