@@ -421,8 +421,8 @@ router.get('/:id/Join', (req, res) => {
 	const rid = req.params.id;
 	if (rooms.get(rid)) {
 		if (req.session.rooms === undefined) req.session.rooms = {};
-		if (req.session.rooms[rid] === undefined)
-			req.session.rooms[rid] = { uid: -1 };
+		req.session.rooms[rid] = { uid: -1 };
+		customLog(['Join', req.session.rooms]);
 		req.session.save();
 		res.redirect('/rooms/' + rid);
 	} else res.redirect('/rooms');
