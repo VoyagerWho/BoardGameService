@@ -24,7 +24,7 @@
                         <%= room.noObservers%>
                     </td>
                     <td>
-                        <form action="/rooms/<%= index %>" method="get">
+                        <form action="/rooms/<%= index %>/Join" method="get">
                             
                             <input type="submit" value="Dołącz" 
                             <% if (room.noPlayers >= room.maxNoPlayers) { %>
