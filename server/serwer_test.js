@@ -3,10 +3,12 @@ const gameAPI = require('./api/game');
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const dbusersRouter = require('./routes/dbusers');
 const rooms = require('./routes/rooms');
 const tictactoe = require('../games/TicTacToe-server');
 const sessionParser = session({
+	store: MongoStore.create({ mongoUrl: process.env.mongoApiKey }),
 	secret: process.env.sessionSecret,
 	resave: true,
 	saveUninitialized: true,
