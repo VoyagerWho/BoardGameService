@@ -7,21 +7,6 @@ const MongoStore = require('connect-mongo');
 const dbusersRouter = require('./routes/dbusers');
 const rooms = require('./routes/rooms');
 const tictactoe = require('../games/TicTacToe-server');
-// const sessionParser = session({
-// 	store: MongoStore.create({
-// 		mongoUrl: process.env.mongoApiKey,
-// 		autoRemove: 'disabled',
-// 	}),
-// 	secret: process.env.sessionSecret,
-// 	resave: false,
-// 	saveUninitialized: false,
-// 	unset: 'destroy',
-// 	cookie: {
-// 		sameSite: 'Lax',
-// 		maxAge: 60000,
-// 		secure: true,
-// 	},
-// });
 
 const sessionParser = session({
 	store: MongoStore.create({
