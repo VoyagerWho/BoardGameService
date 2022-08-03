@@ -24,13 +24,15 @@ const tictactoe = require('../games/TicTacToe-server');
 // });
 
 const sessionParser = session({
+	store: MongoStore.create({
+		mongoUrl: process.env.mongoApiKey,
+	}),
 	secret: process.env.sessionSecret,
 	resave: false,
 	saveUninitialized: false,
 });
 
 var app = express();
-//app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use('/static', express.static(path.join(__dirname, 'resources')));
