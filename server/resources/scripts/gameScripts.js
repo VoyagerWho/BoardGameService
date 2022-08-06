@@ -1,7 +1,5 @@
 var socket = new WebSocket(
-	'wss://' + document.location.host + document.location.pathname,
-	null,
-	{ rejectUnauthorized: false }
+	'wss://' + document.location.host + document.location.pathname
 );
 
 socket.onopen = function (e) {

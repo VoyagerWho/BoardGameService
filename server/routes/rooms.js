@@ -235,13 +235,11 @@ function handleMessage(socket, req, messjson) {
 					(httpsres) => {
 						httpsres.on('data', (d) => {
 							const data = JSON.parse(d.toString());
-							resjson.accepted = data.accepted;
-							resjson.message = data.message;
-							resjson.state = {
-								board: data.board,
-								score: data.score,
-								state: data.state,
-							};
+							resjson = gameAPI.processGameState(
+								data,
+								req.session.rooms[rid].uid
+							);
+							resjson.action = 'Update';
 							socket.send(JSON.stringify(resjson));
 						});
 					},

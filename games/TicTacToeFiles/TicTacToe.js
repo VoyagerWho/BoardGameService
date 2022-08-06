@@ -38,11 +38,6 @@ var playerBegin = 1;
 var score = [0, 0, 0];
 
 /**
- * Flag wheter game is running
- * @type {Boolean}
- */
-
-/**
  * Object representing state of the game
  * @type {JSON}
  */
