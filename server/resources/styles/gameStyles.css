@@ -1,0 +1,21 @@
+.board {
+    border: 1px solid #aaa;
+}
+
+.boardsquare {
+    min-width: 2em;
+    min-height: 2em;
+    text-align: center;
+}
+
+#playersList {
+    margin: 10px 10px;
+    padding: 10px 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid black;
+    /* height: 80vh; */
+    min-width: 200px;
+    color: peru;
+    width: 15%;
+    text-align: left;
+}

@@ -1,5 +1,7 @@
 var socket = new WebSocket(
-	'wss://' + document.location.host + document.location.pathname
+	'wss://' + document.location.host + document.location.pathname,
+	null,
+	{ rejectUnauthorized: false }
 );
 
 socket.onopen = function (e) {
@@ -19,7 +21,12 @@ socket.onmessage = function (event) {
 				break;
 			case 'Update':
 				{
-					updateGUI(resjson.state);
+					updateGUI(resjson);
+				}
+				break;
+			case 'Joined':
+				{
+					document.getElementById('playersList').outerHTML = resjson.message;
 				}
 				break;
 
@@ -35,16 +42,16 @@ socket.onmessage = function (event) {
 
 socket.onclose = function (event) {
 	if (event.wasClean) {
-		alert(
+		console.log(
 			`Connection closed cleanly, code=${event.code} reason=${event.reason}`
 		);
 	} else {
-		alert('Connection died');
+		console.log('Connection died');
 	}
 };
 
 socket.onerror = function (error) {
-	alert(`[error] ${error.message}`);
+	console.log(`${error.message}`);
 };
 
 function startNewGame() {
@@ -63,9 +70,15 @@ function update() {
 function onBodyLoad() {
 	document.getElementById('btnGame').onclick = startNewGame;
 	document.getElementById('btnRound').onclick = startNewRound;
+	// document.getElementById('canvas').onclick = function (e) {
+	// 	console.log('offx: ' + e.offsetX + '; offy: ' + e.offsetY);
+	// };
 }
 
 function updateGUI(state) {
+	document.getElementById('gameStatus').innerHTML = state.gameActiveDesc;
+	document.getElementById('playerRound').innerHTML = state.nextPlayerDesc;
+
 	for (var i = 0; i < 3; ++i) {
 		var row = document.getElementById('brow' + i);
 		for (var j = 0; j < 3; ++j) {
@@ -83,5 +96,7 @@ function updateGUI(state) {
 			}
 		}
 	}
-	document.getElementById('score').innerHTML = state.score.toString();
+	const scoreboard = document.getElementById('scores');
+	for (var i = 0; i < scoreboard.children.length; ++i)
+		scoreboard.children[i].innerHTML = state.score[i].toString();
 }

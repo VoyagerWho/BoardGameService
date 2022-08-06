@@ -4,7 +4,7 @@ body{
 	margin: 0;
 	padding: 0;
 	min-height: 100vh;
-	min-width: 1100px;
+	min-width: 1000px;
 	width: 100%;
 	color: #ccc;
     display: grid;
@@ -93,16 +93,6 @@ td, th{
     border: 1px solid black;
     padding: 3px;
     background-color: #606060;
-}
-
-.board{
-    border: 1px solid #aaa;
-}
-
-.boardsquare{
-    min-width: 2em;
-    min-height: 2em;
-    text-align: center;
 }
 
 form{

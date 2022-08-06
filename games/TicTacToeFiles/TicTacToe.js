@@ -32,7 +32,7 @@ var playerBegin = 1;
 
 /**
  * Array representing game score as
- * [wins of player 1, ties, wins of player 2]
+ * [ties, wins of player 1, wins of player 2]
  * @type {Array<number>}
  */
 var score = [0, 0, 0];
@@ -41,7 +41,12 @@ var score = [0, 0, 0];
  * Flag wheter game is running
  * @type {Boolean}
  */
-var gameActive = false;
+
+/**
+ * Object representing state of the game
+ * @type {JSON}
+ */
+var state = { gameActive: false };
 
 /**
  * Function to initialize new game
@@ -52,7 +57,9 @@ function startNewGame() {
 	player = 1;
 	playerBegin = 1;
 	score = [0, 0, 0];
-	gameActive = true;
+	state.gameActive = true;
+	state.playerWon = undefined;
+	state.draw = undefined;
 }
 
 /**
@@ -63,19 +70,23 @@ function startNewRound() {
 	board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 	playerBegin = (playerBegin % 2) + 1;
 	player = playerBegin;
-	gameActive = true;
+	state.gameActive = true;
+	state.playerWon = undefined;
+	state.draw = undefined;
 }
 /**
  * Function to get current state of the game
- * @param {number} player - Id of user { 0 - observer, >0 - players}
+ * @param {number} playerId - Id of user { 0 - observer, >0 - players}
  * @returns {object} json representation of game state
  */
-function getUpdate(player) {
-	if (typeof player == 'number') {
+function getUpdate(playerId) {
+	if (typeof playerId == 'number') {
 		return {
 			board: board,
 			score: score,
-			state: gameActive,
+			state: state,
+			nextMove: 'choice',
+			nextPlayer: player,
 		};
 	}
 	return {};
@@ -86,7 +97,6 @@ function getUpdate(player) {
  * @returns {boolean} true if player won, false otherwise
  */
 function checkIfWon() {
-	const previous = (player % 2) + 1;
 	// 3 in row
 	for (var i = 0; i < 3; ++i) {
 		var line = true;
@@ -139,12 +149,11 @@ function checkIfDraw() {
  */
 function makeMove(playerId, position) {
 	try {
-		if (!gameActive) throw 'Game inactive!';
+		if (!state.gameActive) throw 'Game inactive!';
 		if (typeof position != 'string' || typeof playerId != 'number')
 			throw 'Incorrect parameter type!';
 
-		if (playerId != player || (playerId != 1 && playerId != 2))
-			throw 'Wrong player id: ' + playerId;
+		if (playerId !== player) throw 'Wrong player id: ' + playerId;
 
 		var nocolumn = position.charCodeAt(0) - 'a'.charCodeAt(0);
 
@@ -178,17 +187,16 @@ function updateGame(playerId, position) {
 		move.accepted = true;
 		if (checkIfWon()) {
 			customLog('Player ' + player + ' won!');
-			if (player == 1) ++score[0];
-			else ++score[2];
-			move.playerWon = player;
-			gameActive = false;
+			++score[player];
+			state.playerWon = player;
+			state.gameActive = false;
 		}
 
 		if (checkIfDraw()) {
 			customLog('Draw!');
-			++score[1];
-			move.draw = true;
-			gameActive = false;
+			++score[0];
+			state.draw = true;
+			state.gameActive = false;
 		}
 		player = (playerId % 2) + 1;
 	} else {

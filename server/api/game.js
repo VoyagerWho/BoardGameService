@@ -12,6 +12,28 @@ const exampleOptions = {
 };
 
 /**
+ * Helper function to process state based on uid
+ * @param {JSON} state - game state object
+ */
+function processGameState(state, uid) {
+	if (state.state.gameActive) {
+		if (state.nextPlayer === uid)
+			state.nextPlayerDesc = `Twój ruch - wykonaj ${state.nextMove}`;
+		else state.nextPlayerDesc = `Ruch Gracza Player${state.nextPlayer}`;
+		state.gameActiveDesc = 'Runda rozpoczęta';
+	} else {
+		if (state.state.draw) state.nextPlayerDesc = 'Runda zakończona remisem!';
+		else if (state.state.playerWon) {
+			if (state.nextPlayer === uid) state.nextPlayerDesc = 'Wygrałeś rundę';
+			elsestate.nextPlayerDesc = `Rundę wygrał Gracz Player${state.nextPlayer}`;
+		} else state.nextPlayerDesc = ' ';
+		state.gameActiveDesc = 'Gra zakończona';
+	}
+
+	return state;
+}
+
+/**
  * Function to send https request
  * @param {string | URL | https.RequestOptions} options
  * @param {*} data
@@ -127,11 +149,8 @@ function updateAll(rid, room) {
 			httpsRequest(options, data, (res) => {
 				res.on('data', (d) => {
 					const httpsres = JSON.parse(d.toString());
-					const resjson = {
-						accepted: true,
-						action: 'Update',
-						state: httpsres,
-					};
+					const resjson = processGameState(httpsres, index);
+					resjson.action = 'Update';
 					player.socket.send(JSON.stringify(resjson));
 				});
 			});
@@ -144,11 +163,8 @@ function updateAll(rid, room) {
 		httpsRequest(options, data, (res) => {
 			res.on('data', (d) => {
 				const httpsres = JSON.parse(d.toString());
-				const resjson = {
-					accepted: true,
-					action: 'Update',
-					state: httpsres,
-				};
+				const resjson = processGameState(httpsres, 0);
+				resjson.action = 'Update';
 				room.observers.forEach((observer) => {
 					if (observer) {
 						observer.socket.send(JSON.stringify(resjson));
@@ -165,4 +181,5 @@ module.exports.startNewRound = startNewRound;
 module.exports.makeMove = makeMove;
 module.exports.update = update;
 module.exports.updateAll = updateAll;
+module.exports.processGameState = processGameState;
 module.exports.exampleOptions = exampleOptions;

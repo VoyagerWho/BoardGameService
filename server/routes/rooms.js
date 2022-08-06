@@ -3,6 +3,14 @@ const bodyParser = require('body-parser');
 const router = express.Router();
 const gameAPI = require('../api/game');
 const ws = require('ws');
+const ejs = require('ejs');
+const path = require('path');
+
+/**
+ * Path to the views folder
+ * @type {String}
+ */
+const views = path.join(__dirname, '..', 'views');
 
 /**
  * App session instance
@@ -71,6 +79,57 @@ openRoom('0', games.get('0'));
 
 //---------------------------------------------------------------------
 const wsServer = new ws.Server({ noServer: true });
+
+/**
+ * Function handling update of Users list for every room member
+ * @param {String} rid - ID of room instance
+ * @param {JSON} room - room instance to update
+ */
+function updateUsersList(room) {
+	room.players.forEach((player, index) => {
+		if (player) {
+			ejs
+				.renderFile(
+					path.join(views, 'partials', 'gamesparts', 'misc', 'users.ejs'),
+					{
+						room: room,
+						uid: index,
+					}
+				)
+				.then((value) => {
+					player.socket.send(
+						JSON.stringify({
+							accepted: true,
+							action: 'Joined',
+							message: value,
+						})
+					);
+				});
+		}
+	});
+	room.observers.forEach((observer, index) => {
+		if (observer) {
+			ejs
+				.renderFile(
+					path.join(views, 'partials', 'gamesparts', 'misc', 'users.ejs'),
+					{
+						room: room,
+						uid: 0,
+						oid: index,
+					}
+				)
+				.then((value) => {
+					observer.socket.send(
+						JSON.stringify({
+							accepted: true,
+							action: 'Joined',
+							message: value,
+						})
+					);
+				});
+		}
+	});
+}
 
 /**
  * Handler for socket messages
@@ -259,6 +318,7 @@ wsServer.on('connection', (socket, req) => {
 		}
 		console.log('Role assigned');
 		socket.send(JSON.stringify(resjson));
+		updateUsersList(room);
 		socket.on('message', (message) => {
 			var messjson = {};
 			try {
@@ -394,15 +454,23 @@ router.get('/games/check/:id', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-	customLog(['Site opened', req.session.rooms]);
 	const rid = req.params.id;
+	if (req.session.rooms === undefined) req.session.rooms = {};
+	if (req.session.rooms[rid] === undefined) req.session.rooms[rid] = { uid: 0 };
+	customLog(['Site opened', req.session.rooms]);
 	if (rooms.get(rid)) {
 		const room = rooms.get(rid);
 		const game = room.game;
 		res.render('index', {
-			text: game.name,
+			headerMess: game.name,
 			middle: 'board',
 			game: game,
+			room: room,
+			uid: req.session.rooms[rid].uid,
+			oid:
+				req.session.rooms[rid].uid == 0
+					? req.session.rooms[rid].oid
+					: undefined,
 		});
 	} else res.redirect('/rooms');
 });

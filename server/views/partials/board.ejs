@@ -1,17 +1,12 @@
-<header id="gameName"><%= locals.game.name %></header>
+<header>
+    <h1 id="gameStatus">Unknown</h1>
+    <h3 id="playerRound"></h3>
+</header>
 <div id="gameBoard">
-    <% const board = locals.game.board
-    switch (board.type) {
-        case "table":
-            {%>
-                <%- include("./gamesparts/boards/"+board.type+".ejs") %>
-            <%
-            }break;
-
-        default:
-            {
-                %>Nie znany rodzaj planszy!<%
-            }break;
-    }%> 
+    <% switch (locals.game.board.type) { case "table" : {%>
+        <%- include("./gamesparts/boards/"+locals.game.board.type+".ejs") %>
+            <% }break; default: { %>Nie znany rodzaj planszy!<% }break; }%>
 </div>
-<footer id="gameFooter"><%= locals.game.description%></footer>
+<footer id="gameFooter">
+    <%= locals.game.description%>
+</footer>

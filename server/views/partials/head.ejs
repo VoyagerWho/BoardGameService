@@ -1,9 +1,10 @@
 <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" type="text/css" href="/static/basicStyles.css" />
+    <link rel="stylesheet" type="text/css" href="/static/styles/basicStyles.css" />
     <title>Serwis gier planszowych - <%= locals.text %></title>
-    <script src="/static/basicScripts.js"></script>
+    <script src="/static/scripts/basicScripts.js"></script>
     <% if (locals.game) { %>
-        <script src="/static/gameScripts.js"></script>
+        <script src="/static/scripts/gameScripts.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/styles/gameStyles.css" />
     <% } %>
 </head>

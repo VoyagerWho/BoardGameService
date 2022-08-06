@@ -1,0 +1,34 @@
+<div id="playersList">
+    <b>
+        <% if (locals.uid> 0) { %>
+            Jesteś Graczem<br />Player<%= locals.uid %>
+                <% } else { %>
+                    Jesteś Obserwatorem
+                    <% } %>
+    </b>
+    <br /><br /><b>Członkowie:</b>
+    <ul>
+        <li>Gracze:
+            <ul>
+                <% locals.room.players.forEach((element, index)=> { %>
+                    <% if (element) { %>
+                        <li>Player<%= index %>
+                                <%= locals.uid==index ? '(Ty)' : '' %>
+                        </li>
+                        <% } %>
+                            <% }) %>
+            </ul>
+        </li>
+        <li>Obserwatorzy:
+            <ul>
+                <% locals.room.observers.forEach((element, index)=> { %>
+                    <% if (element) { %>
+                        <li>Observer<%= index %>
+                                <%= locals.oid==index ? '(Ty)' : '' %>
+                        </li>
+                        <% } %>
+                            <% }) %>
+            </ul>
+        </li>
+    </ul>
+</div>
