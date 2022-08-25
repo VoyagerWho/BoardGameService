@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const TicTacToe = require('./TicTacToeFiles/TicTacToe');
 
 const rooms = new Map();
+rooms.set('#0', TicTacToe.openRoom());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -38,7 +39,7 @@ app.get('/', function (req, res) {
 app.post('/Open', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	if (!rooms.get(roomName)) {
 		rooms.set(roomName, TicTacToe.openRoom());
@@ -49,7 +50,7 @@ app.post('/Open', (req, res) => {
 app.post('/Close', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	if (rooms.get(roomName)) {
 		rooms.set(roomName, undefined);
@@ -60,7 +61,7 @@ app.post('/Close', (req, res) => {
 app.post('/NewGame', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
@@ -72,7 +73,7 @@ app.post('/NewGame', (req, res) => {
 app.post('/NewRound', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
@@ -84,7 +85,7 @@ app.post('/NewRound', (req, res) => {
 app.post('/Move', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
@@ -100,7 +101,7 @@ app.post('/Move', (req, res) => {
 app.post('/Update', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
