@@ -35,7 +35,7 @@ app.get('/', function (req, res) {
 	res.redirect('/tictactoe/api');
 });
 
-app.post('/tictactoe/Open', (req, res) => {
+app.post('/Open', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = host + '#' + rid;
@@ -46,7 +46,7 @@ app.post('/tictactoe/Open', (req, res) => {
 	} else res.json({ accepted: false, message: 'Room exists!' });
 });
 
-app.post('/tictactoe/Close', (req, res) => {
+app.post('/Close', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = host + '#' + rid;
@@ -57,7 +57,7 @@ app.post('/tictactoe/Close', (req, res) => {
 	} else res.json({ accepted: false, message: "Room doesn't exists!" });
 });
 
-app.post('/tictactoe/NewGame', (req, res) => {
+app.post('/NewGame', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = host + '#' + rid;
@@ -69,7 +69,7 @@ app.post('/tictactoe/NewGame', (req, res) => {
 	} else res.json({ accepted: false, message: "Room doesn't exists!" });
 });
 
-app.post('/tictactoe/NewRound', (req, res) => {
+app.post('/NewRound', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = host + '#' + rid;
@@ -81,7 +81,7 @@ app.post('/tictactoe/NewRound', (req, res) => {
 	} else res.json({ accepted: false, message: "Room doesn't exists!" });
 });
 
-app.post('/tictactoe/Move', (req, res) => {
+app.post('/Move', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = host + '#' + rid;
@@ -97,7 +97,7 @@ app.post('/tictactoe/Move', (req, res) => {
 	} else res.json({ accepted: false, message: "Room doesn't exists!" });
 });
 
-app.post('/tictactoe/Update', (req, res) => {
+app.post('/Update', (req, res) => {
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = host + '#' + rid;
