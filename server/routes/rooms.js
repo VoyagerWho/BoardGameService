@@ -229,7 +229,7 @@ function handleMessage(socket, req, messjson) {
 					{ room: rid, player: req.session.rooms[rid].uid },
 					(httpsres) => {
 						httpsres.on('data', (d) => {
-							customLog(['Update response', data]);
+							customLog(['Update response', d]);
 							const data = JSON.parse(d.toString());
 							if (data.accepted) {
 								resjson = gameAPI.processGameState(
