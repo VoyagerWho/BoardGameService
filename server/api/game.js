@@ -16,6 +16,7 @@ const exampleOptions = {
  * @param {JSON} state - game state object
  */
 function processGameState(state, uid) {
+	console.log(['processGameState', state]);
 	if (state.state.gameActive) {
 		if (state.nextPlayer === uid)
 			state.nextPlayerDesc = `Twój ruch - wykonaj ${state.nextMove}`;
@@ -24,12 +25,13 @@ function processGameState(state, uid) {
 	} else {
 		if (state.state.draw) state.nextPlayerDesc = 'Runda zakończona remisem!';
 		else if (state.state.playerWon) {
-			if (state.nextPlayer === uid) state.nextPlayerDesc = 'Wygrałeś rundę';
-			elsestate.nextPlayerDesc = `Rundę wygrał Gracz Player${state.nextPlayer}`;
+			if (state.state.playerWon === uid)
+				state.nextPlayerDesc = 'Wygrałeś rundę';
+			else
+				state.nextPlayerDesc = `Rundę wygrał Gracz Player${state.state.playerWon}`;
 		} else state.nextPlayerDesc = ' ';
 		state.gameActiveDesc = 'Gra zakończona';
 	}
-
 	return state;
 }
 
@@ -126,11 +128,11 @@ const update = (game, data, responseHandler, errorHandler) =>
 function sendCommand(command, game, data, responseHandler, errorHandler) {
 	var options = getHttpsOptionsForGame(game);
 	options.path = game.api[command];
-	if (data) {
-		console.log(data);
+	if (data && Object.keys(data).length) {
+		console.log({ command, data });
 		data = JSON.stringify(data);
 		options.headers['Content-Length'] = data.length;
-	}
+	} else data = null;
 	httpsRequest(options, data, responseHandler, errorHandler);
 }
 
@@ -149,9 +151,12 @@ function updateAll(rid, room) {
 			httpsRequest(options, data, (res) => {
 				res.on('data', (d) => {
 					const httpsres = JSON.parse(d.toString());
-					const resjson = processGameState(httpsres, index);
-					resjson.action = 'Update';
-					player.socket.send(JSON.stringify(resjson));
+					if (httpsres.accepted) {
+						const resjson = processGameState(httpsres, index);
+						resjson.action = 'Update';
+						player.socket.send(JSON.stringify(resjson));
+					} else
+						console.log([`Update API error (on player ${index})`, httpsres]);
 				});
 			});
 		}
@@ -159,17 +164,19 @@ function updateAll(rid, room) {
 	if (room.observers.length) {
 		var data = JSON.stringify({ room: rid, player: 0 });
 		options.headers['Content-Length'] = data.length;
-		console.log({ data, options });
 		httpsRequest(options, data, (res) => {
 			res.on('data', (d) => {
 				const httpsres = JSON.parse(d.toString());
-				const resjson = processGameState(httpsres, 0);
-				resjson.action = 'Update';
-				room.observers.forEach((observer) => {
-					if (observer) {
-						observer.socket.send(JSON.stringify(resjson));
-					}
-				});
+				if (httpsres.accepted) {
+					const resjson = processGameState(httpsres, 0);
+					resjson.action = 'Update';
+					room.observers.forEach((observer) => {
+						if (observer) {
+							observer.socket.send(JSON.stringify(resjson));
+						}
+					});
+				} else
+					console.log([`Update API error (on observer ${index})`, httpsres]);
 			});
 		});
 	}

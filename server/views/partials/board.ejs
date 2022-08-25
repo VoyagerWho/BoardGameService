@@ -3,7 +3,7 @@
     <h3 id="playerRound"></h3>
 </header>
 <div id="gameBoard">
-    <% switch (locals.game.board.type) { case "table" : {%>
+    <% switch (locals.game.board.type) { case "table" : case "simple" : case "custom" :{%>
         <%- include("./gamesparts/boards/"+locals.game.board.type+".ejs") %>
             <% }break; default: { %>Nie znany rodzaj planszy!<% }break; }%>
 </div>

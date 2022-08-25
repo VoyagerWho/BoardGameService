@@ -1,5 +1,7 @@
 var socket = new WebSocket(
-	'wss://' + document.location.host + document.location.pathname
+	'wss://' + document.location.host + document.location.pathname,
+	null,
+	{ rejectUnauthorized: false }
 );
 
 socket.onopen = function (e) {
@@ -68,33 +70,5 @@ function update() {
 function onBodyLoad() {
 	document.getElementById('btnGame').onclick = startNewGame;
 	document.getElementById('btnRound').onclick = startNewRound;
-	// document.getElementById('canvas').onclick = function (e) {
-	// 	console.log('offx: ' + e.offsetX + '; offy: ' + e.offsetY);
-	// };
-}
-
-function updateGUI(state) {
-	document.getElementById('gameStatus').innerHTML = state.gameActiveDesc;
-	document.getElementById('playerRound').innerHTML = state.nextPlayerDesc;
-
-	for (var i = 0; i < 3; ++i) {
-		var row = document.getElementById('brow' + i);
-		for (var j = 0; j < 3; ++j) {
-			cell = row.getElementsByTagName('td')[j];
-			switch (state.board[3 * i + j]) {
-				case 0:
-					cell.innerText = ' ';
-					break;
-				case 1:
-					cell.innerText = 'O';
-					break;
-				case 2:
-					cell.innerText = 'X';
-					break;
-			}
-		}
-	}
-	const scoreboard = document.getElementById('scores');
-	for (var i = 0; i < scoreboard.children.length; ++i)
-		scoreboard.children[i].innerHTML = state.score[i].toString();
+	setup();
 }

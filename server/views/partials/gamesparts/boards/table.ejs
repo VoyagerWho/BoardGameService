@@ -1,3 +1,36 @@
+<script>
+    const nr = <%= locals.game.board.rowCount %>;
+    const nc = <%= locals.game.board.columnCount %>;
+    function updateGUI(state) {
+        document.getElementById('gameStatus').innerHTML = state.gameActiveDesc;
+        document.getElementById('playerRound').innerHTML = state.nextPlayerDesc;
+
+        for (var i = 0; i < nr; ++i) {
+            var row = document.getElementById('brow' + i);
+            for (var j = 0; j < nc; ++j) {
+                cell = row.getElementsByTagName('td')[j];
+                switch (state.board[nr * i + j]) {
+                    case 0:
+                        cell.innerText = ' ';
+                        break;
+                    case 1:
+                        cell.innerText = 'O';
+                        break;
+                    case 2:
+                        cell.innerText = 'X';
+                        break;
+                }
+            }
+        }
+        const scoreboard = document.getElementById('scores');
+        for (var i = 0; i < scoreboard.children.length; ++i)
+            scoreboard.children[i].innerHTML = state.score[i].toString();
+    }
+
+    function setup() {
+        console.log('Setup finished!');
+    }
+</script>
 <% const board=locals.game.board; var orl=0; var ocl=0; switch (board.rowLabels) { case "d" : orl=49; break; case "l" :
     orl=97; break; } switch (board.columnLabels) { case "d" : ocl=49; break; case "l" : ocl=97; break; } if (orl> 0 &&
     ocl > 0) { %>
@@ -24,33 +57,5 @@
                 <% } %>
         </tbody>
     </table>
-    <form id="ruch">
-        <input type="button" id="btnGame" value="Nowa Gra" />
-        <input type="button" id="btnRound" value="Nowa Runda" />
-    </form>
-    <br />
-    <div id="score">
-        <table class="scoreboard">
-            <thead>
-                Tabela wyników
-            </thead>
-            <tbody>
-                <tr>
-                    <th>Remisy</th>
-                    <% for (var i=0; i < locals.game.maxNoPlayers; ++i) { %>
-                        <th>Player<%= i+1 %>
-                        </th>
-                        <% } %>
-
-                </tr>
-                <tr id="scores">
-                    <td>0</td>
-                    <% for (var i=0; i < locals.game.maxNoPlayers; ++i) { %>
-                        <td>0</td>
-                        <% } %>
-
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <% } else { %>Nie znany rodzaj numeracji!<% } %>
+    <%- include('../misc/score.ejs') %>
+        <% } else { %>Nie znany rodzaj numeracji!<% } %>

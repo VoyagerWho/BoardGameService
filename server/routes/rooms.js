@@ -61,11 +61,18 @@ games.set('0', {
 	description: 'Dwuosobowa gra  planszowa w kółko i krzyżyk',
 	maxNoPlayers: 2,
 	board: {
-		type: 'table',
+		type: 'simple',
 		rowCount: 3,
 		rowLabels: 'd',
 		columnCount: 3,
 		columnLabels: 'l',
+		tileWidth: 64,
+		tileHeight: 64,
+		textures: [
+			'/static/images/textures/Tile1.png',
+			'/static/images/textures/Tile1sp1.png',
+			'/static/images/textures/Tile1sp2.png',
+		],
 	},
 	api: {
 		NewGame: '/tictactoe/NewGame',
@@ -154,18 +161,6 @@ function handleMessage(socket, req, messjson) {
 	}
 	customLog(['Socket handler', messjson]);
 	switch (messjson.action) {
-		case '_dCP':
-			{
-				if (roomStats.roomsId >= 0 && roomStats.roomsId < rooms.length) {
-					const room = rooms[roomStats.roomsId];
-					room.noPlayers = 0;
-					room.players = [];
-				}
-				socket.send(
-					JSON.stringify({ accepted: true, action: messjson.action })
-				);
-			}
-			break;
 		case 'NewGame':
 			{
 				gameAPI.startNewGame(
@@ -235,12 +230,14 @@ function handleMessage(socket, req, messjson) {
 					(httpsres) => {
 						httpsres.on('data', (d) => {
 							const data = JSON.parse(d.toString());
-							resjson = gameAPI.processGameState(
-								data,
-								req.session.rooms[rid].uid
-							);
-							resjson.action = 'Update';
-							socket.send(JSON.stringify(resjson));
+							if (data.accepted) {
+								resjson = gameAPI.processGameState(
+									data,
+									req.session.rooms[rid].uid
+								);
+								resjson.action = 'Update';
+								socket.send(JSON.stringify(resjson));
+							} else customLog(['Update API error', data]);
 						});
 					},
 					null

@@ -1,11 +1,27 @@
 .board {
-    border: 1px solid #aaa;
+    background-color: black;
+    table-layout: fixed;
+    font-size: 3rem;
+    padding: 0px;
+    border: 2px solid #aaa;
+}
+
+.board th {
+    background-color: #444;
+    font-size: 1em;
+    display: none;
+}
+
+.board tr:first-child {
+    display: none;
 }
 
 .boardsquare {
-    min-width: 2em;
-    min-height: 2em;
+    border-style: none;
     text-align: center;
+    background-color: #666;
+    width: 64px;
+    height: 64px;
 }
 
 #playersList {
@@ -13,9 +29,12 @@
     padding: 10px 10px;
     background-color: rgba(0, 0, 0, 0.5);
     border: 2px solid black;
-    /* height: 80vh; */
     min-width: 200px;
     color: peru;
     width: 15%;
     text-align: left;
+}
+
+#layout {
+    display: none;
 }
