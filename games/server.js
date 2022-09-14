@@ -151,7 +151,7 @@ app.post('/:GameName/Update', (req, res) => {
 //-----------------------------------------------------------------------------
 
 const hostname = 'bgs-argen-game-server.herokuapp.com';
-const port = process.env.PORT || process.argv[2] || 8443;
+const port = 443;
 
 const description = {
 	TicTacToe: {
