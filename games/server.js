@@ -53,7 +53,7 @@ app.post('/:GameName/Open', (req, res) => {
 	const gameName = req.params.GameName;
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	if (!rooms.get(roomName)) {
 		rooms.set(roomName, games[gameName].openRoom());
@@ -66,7 +66,7 @@ app.post('/:GameName/Close', (req, res) => {
 	const gameName = req.params.GameName;
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	if (rooms.get(roomName)) {
 		rooms.delete(roomName);
@@ -79,7 +79,7 @@ app.post('/:GameName/NewGame', (req, res) => {
 	const gameName = req.params.GameName;
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
@@ -92,7 +92,7 @@ app.post('/:GameName/NewRound', (req, res) => {
 	const gameName = req.params.GameName;
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
@@ -105,7 +105,7 @@ app.post('/:GameName/Move', (req, res) => {
 	const gameName = req.params.GameName;
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
@@ -132,7 +132,7 @@ app.post('/:GameName/Update', (req, res) => {
 	const gameName = req.params.GameName;
 	const rid = req.body.room;
 	const host = req.ip;
-	const roomName = host + '#' + rid;
+	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
