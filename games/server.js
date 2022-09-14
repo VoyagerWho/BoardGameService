@@ -40,7 +40,7 @@ function customLog(toLog) {
 
 // app.use(
 // 	OpenApiValidator.middleware({
-// 		apiSpec: './server/openAPI/openapi.yml',
+// 		apiSpec: './openAPI/openapi.yml',
 // 		validateRequests: true, // (default)
 // 		validateResponses: true, // false by default
 // 	})
