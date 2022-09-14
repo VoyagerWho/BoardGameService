@@ -151,13 +151,13 @@ app.post('/:GameName/Update', (req, res) => {
 //-----------------------------------------------------------------------------
 
 const hostname = 'bgs-argen-game-server.herokuapp.com';
-const port = 443;
+const port = process.env.PORT || process.argv[2] || 8443;
 
 const description = {
 	TicTacToe: {
 		name: 'TicTacToe',
 		hostname: hostname,
-		port: port,
+		port: 443,
 		description: 'Dwuosobowa gra planszowa w kółko i krzyżyk',
 		maxNoPlayers: 2,
 		minNoPlayers: 2,
@@ -191,7 +191,7 @@ const description = {
 	ConnectFour: {
 		name: 'ConnectFour',
 		hostname: hostname,
-		port: port,
+		port: 443,
 		description: 'Cztero-osobowa gra planszowa w połącz 4 w linii',
 		maxNoPlayers: 4,
 		minNoPlayers: 2,
@@ -225,7 +225,7 @@ const description = {
 	ManDontGetAngry: {
 		name: 'ManDontGetAngry',
 		hostname: hostname,
-		port: port,
+		port: 443,
 		description: 'Cztero-osobowa gra planszowa w chińczyka',
 		maxNoPlayers: 4,
 		minNoPlayers: 2,
