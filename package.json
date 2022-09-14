@@ -1,7 +1,7 @@
 {
-  "name": "BoardGameService",
+  "name": "games",
   "version": "1.0.0",
-  "description": "Web service for board games",
+  "description": "Web service hosting game logic",
   "main": "index.js",
   "dependencies": {
     "connect-mongo": "^4.6.0",
@@ -15,7 +15,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server/serwer_test.js"
+    "start": "node games/server.js"
   },
   "repository": {
     "type": "git",

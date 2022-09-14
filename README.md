@@ -1,2 +1,3 @@
 # BoardGameService
-Web service for board games
+
+Web service hosting board games logic

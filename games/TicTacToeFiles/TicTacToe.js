@@ -55,7 +55,7 @@ function openRoom() {
  * Function to initialize new game
  * clearing previous' game status
  */
-function startNewGame(room) {
+function startNewGame(room, players) {
 	room.board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 	room.player = 1;
 	room.playerBegin = 1;
@@ -85,7 +85,11 @@ function startNewRound(room) {
 function getUpdate(room, playerId) {
 	if (typeof playerId == 'number') {
 		return {
-			board: room.board,
+			boards: [
+				room.board,
+				[0, 1, 2, 0, 2, 1, 1, 2, 0],
+				[0, 1, 0, 2, 0, 2, 0, 1, 0],
+			],
 			score: room.score,
 			state: room.state,
 			nextMove: 'choice',
