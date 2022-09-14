@@ -4,9 +4,9 @@ body{
 	margin: 0;
 	padding: 0;
 	min-height: 100vh;
-	min-width: 1000px;
+	min-width: 1280px;
 	width: 100%;
-	color: #ccc;
+	color: #c0c0c0;
     display: grid;
 	grid-template-columns: 20% 1fr 20%;
 }
@@ -23,7 +23,7 @@ body{
 	background-color: #606060;
 	height: 100%;
 	max-height: 100%;
-	min-width: 540px;
+	min-width: 640px;
 	text-align: center;
 }
 
@@ -47,6 +47,10 @@ nav{
 	position: absolute;
     top: 10px;
     width: 15%;
+	font-size: large;
+	text-shadow: 1px 1px black, 2px 2px 2px peru;
+	font-weight: bold;
+	
 }
 
 #extras{
@@ -62,12 +66,20 @@ nav{
 }
 
 
-h1{
+h1 {
     color: peru;
 }
 
-a{
+a {
 	color: peru;
+	text-decoration: none;
+}
+
+a > div {
+	padding: 4px;
+	margin: 8px;
+	border: 1px solid #606060;
+	border-radius: 8px;
 }
 
 button {
@@ -97,6 +109,15 @@ td, th{
 
 form{
     margin-top: 5px;
+	border: 2px solid peru;
+	border-radius: 8px;
+	padding: 8px;
+
+}
+
+form > h2 {
+	margin: 0;
+	margin-bottom: 4px;
 }
 
 footer{

@@ -1,13 +1,14 @@
 .board {
-    background-color: black;
+    background-color: #606060;
     table-layout: fixed;
     font-size: 3rem;
     padding: 0px;
-    border: 2px solid #aaa;
+    border: 2px solid #a0a0a0;
+    margin: 20px auto 20px;
 }
 
 .board th {
-    background-color: #444;
+    background-color: #404040;
     font-size: 1em;
     display: none;
 }
@@ -19,7 +20,7 @@
 .boardsquare {
     border-style: none;
     text-align: center;
-    background-color: #666;
+    background-color: #404040;
     width: 64px;
     height: 64px;
 }
@@ -35,6 +36,52 @@
     text-align: left;
 }
 
-#layout {
+.layout {
     display: none;
+}
+
+.diceSpace {
+    margin: 10px auto 10px;
+    display: inline-block;
+}
+
+.diceSpace > button {
+    display: inline-block;
+    font-size: 2.5rem;
+    text-align: right;
+    margin-left: 64px;
+    background-color: #404040;
+    border: 1px solid black;
+    color: #c0c0c0;
+    padding: 8px;
+    box-shadow: 4px 4px 4px #606060 inset, -4px -4px 4px #606060 inset;
+    transition-duration: 0.5s;
+}
+
+.diceSpace>button:active {
+    background-color: #20e20e;
+    box-shadow: 4px 4px 4px #404040 inset, -4px -4px 4px #404040 inset;
+}
+
+.diceSpace>button:hover {
+    border: 1px solid peru;
+}
+
+.dice {
+    width: 64px;
+    height: 64px;
+    background-color: #404040;
+    display: inline-block;
+    border-radius: 16px;
+    box-shadow: 8px -4px #404040, -4px 2px 2px #606060 inset, 4px -2px 2px #404040, 0px -2px 8px black inset;
+}
+
+#wsIndicator {
+    background-color: red;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #404040, 0 0 0 2px #a0a0a0 inset;
+    transition-duration: 0.5s;
 }

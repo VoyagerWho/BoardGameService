@@ -1,113 +1,115 @@
-<div id="layout">
-    <%= JSON.stringify(locals.game.board) %>
+<div class="layout">
+    <%= JSON.stringify(locals.board) %>
 </div>
 <script>
-    const tiles = [new Image(), new Image(), new Image()];
-    const tileH = <%=  locals.game.board.tileHeight %>;
-    const tileW = <%=  locals.game.board.tileWidth %>;
-    const layout = JSON.parse(document.getElementById('layout').innerText);
-    if (layout.background.image) {
+    const <%= 'tiles' + locals.index %> =[];
+    const <%= 'layout' + locals.index %> = JSON.parse(document.getElementById('board:<%= locals.index %>').getElementsByClassName('layout')[0].innerText);
+    if (<%= 'layout' + locals.index %>.background.image) {
         let background = {};
     }
-    if (layout.background.color) {
-        document.getElementById('canvas').style.backgroundColor = layout.background.color;
+    if (<%= 'layout' + locals.index %>.background.color) {
+        document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.backgroundColor = <%= 'layout' + locals.index %>.background.color;
     }
-    async function loadImages() {
+    async function loadImages<%= locals.index %> () {
         const promiseArray = [];
-        layout.textures.forEach((imageUrl, index) => {
+        <%= 'layout' + locals.index %>.textures.forEach((imageUrl, index) => {
             promiseArray.push(new Promise(resolve => {
-                tiles[index].onload = () => {
+                <%='tiles' + locals.index %>.push(new Image());
+                <%='tiles' + locals.index %> [index].onload = () => {
                     resolve();
                 };
 
-                tiles[index].src = imageUrl;
+                <%='tiles' + locals.index %> [index].src = imageUrl;
             }));
         });
-        if (layout.background.image) {
+        if (<%= 'layout' + locals.index %>.background.image) {
             promiseArray.push(new Promise(resolve => {
                 background = new Image();
                 background.onload = () => {
                     resolve();
                 };
-                background.src = layout.background.image;
+                background.src = <%= 'layout' + locals.index %>.background.image;
             }));
         }
         await Promise.all(promiseArray);
         console.log("all images loaded");
         update();
     }
-    loadImages();
-    function updateGUI(state) {
-        document.getElementById('gameStatus').innerHTML = state.gameActiveDesc;
-        document.getElementById('playerRound').innerHTML = state.nextPlayerDesc;
-        const c = document.getElementById('canvas');
+    <%= 'loadImages' + locals.index %> ();
+    updateFunctions.push((state) => {
+        const tileH = <%=  locals.board.tileHeight %>;
+        const tileW = <%=  locals.board.tileWidth %>;
+        const boardId = <%= locals.index %>;
+        const c = document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0];
         const ctx = c.getContext('2d');
         const height = c.height;
         const width = c.width;
         ctx.strokeStyle = '#aaaaaa';
-        if (layout.background.image) {
-            ctx.drawImage(background, 0, 0, width, height);
-        }
-        layout.tiles.forEach((tile, index) => {
-            ctx.drawImage(tiles[state.board[index] || 0], tile.x, tile.y, tileW, tileH);
-            ctx.strokeRect(tile.x, tile.y, tileW, tileH);
-        });
-
-        // for (var i = tileH; i < height; i = i + tileH) {
-        //     ctx.moveTo(0, i);
-        //     ctx.lineTo(width, i);
-        //     ctx.stroke();
-        // }
-        // for (var i = tileW; i < width; i = i + tileW) {
-        //     ctx.moveTo(i, 0);
-        //     ctx.lineTo(i, height);
-        //     ctx.stroke();
-        // }
-
-        const scoreboard = document.getElementById('scores');
-        for (var i = 0; i < scoreboard.children.length; ++i)
-            scoreboard.children[i].innerHTML = state.score[i].toString();
+        if (<%= 'layout' + locals.index %>.background.image) {
+        ctx.drawImage(background, 0, 0, width, height);
     }
+        <%= 'layout' + locals.index %>.tiles.forEach((tile, index) => {
+        ctx.drawImage(<%='tiles' + locals.index %> [state.boards[boardId][index] || 0], tile.x, tile.y, tileW, tileH);
+        ctx.strokeRect(tile.x, tile.y, tileW, tileH);
+    });
+    });
 </script>
 <% if (locals.uid !==0) { %>
     <script>
-        function checkClick(pos) {
-            try {
-                layout.tiles.forEach((tile) => {
+        setupFunctions.push(() => {
+            checkClick = (pos) => {
+                const tileH = <%=  locals.board.tileHeight %>;
+                const tileW = <%=  locals.board.tileWidth %>;
+                var clicked = '';
+                try {
+                    <%= 'layout' + locals.index %>.tiles.forEach((tile) => {
                     if (
                         pos.x >= tile.x &&
                         pos.x <= tile.x + tileW &&
                         pos.y >= tile.y &&
                         pos.y <= tile.y + tileH
                     ) {
-                        makeMove(tile.name);
-                        throw new Error('Found clicked tile!');
+                        clicked = tile.name;
+                        throw Error('Found tile')
                     }
+
                 });
-            } catch (error) {
-                if (!error.message || error.message !== 'Found clicked tile!') {
-                    // another error has happened
-                    throw error;
+                } catch (error) {
+                    if (error.message !== 'Found tile') {
+                        throw error;
+                    }
+
                 }
+
+                return clicked;
             }
-        }
+            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].onclick = (e) => {
+                <% if (locals.uid !== 0) { %>
+                    if (nextMove === 'choice') {
+                        makeMove(checkClick({ x: e.offsetX, y: e.offsetY }), <%= locals.index %>);
+                    }
+                    else if (nextMove === 'move') {
+                        const currentClick = checkClick({ x: e.offsetX, y: e.offsetY });
+                        if (lastClick === '') {
+                            lastClick = currentClick;
+                            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid limegreen';
+                        }
+                        else if (lastClick === currentClick) {
+                            lastClick = '';
+                            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid #a0a0a0';
+                        }
+                        else {
+                            makeMove(lastClick + '|' + checkClick({ x: e.offsetX, y: e.offsetY }), <%= locals.index %>);
+                            lastClick = '';
+                            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid #a0a0a0';
+                        }
 
-        function setup() {
-            document.getElementById('canvas').onclick = function (e) {
-                checkClick({ x: e.offsetX, y: e.offsetY });
+                    }
+                <% } %>
             };
-        }
+        });
     </script>
-    <% } else { %>
-        <script>function setup() { }</script>
-        <% } %>
-            <canvas id="canvas" class="board" width="<%= locals.game.board.layout.width %>"
-                height="<%= locals.game.board.layout.height %>">
-
-            </canvas>
-            <form id="ruch">
-                <input type="button" id="btnGame" value="Nowa Gra" />
-                <input type="button" id="btnRound" value="Nowa Runda" />
-            </form>
-            <br />
-            <%- include('../misc/score.ejs') %>
+    <% } %>
+        <canvas class="canvas board" width="<%= locals.board.width %>" height="<%= locals.board.height %>"
+            draggable="true">
+        </canvas>

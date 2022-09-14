@@ -1,0 +1,36 @@
+<script>
+    updateFunctions.push((state) => {
+
+    });
+
+    setupFunctions.push(() => {
+        document.getElementById("board:<%= locals.index%>").getElementsByTagName("button")[0].onclick = (e) => {
+            makeMove('throw', <%= locals.index %>);
+        }
+    });
+
+    function rollDices<%= locals.index %> (dices) {
+        const diceSpace = document.getElementById("board:<%= locals.index%>").getElementsByClassName("diceSpace")[0];
+        var counter = 0;
+        const id = setInterval(() => {
+            if (counter < dices[0].length) {
+                dices.forEach((faces, index) => {
+                    diceSpace.getElementsByClassName("dice")[index].innerHTML = faces[counter];
+                });
+                ++counter;
+            }
+            else
+                clearInterval(id);
+        }, 50);
+    }
+</script>
+<div class="board">
+    <div class="diceSpace">
+        <% for (var i=0; i<locals.board.numberOfDices; ++i) { %>
+            <div class="dice">
+                <%= Math.floor(Math.random()*locals.board.numberOfSides)+1 %>
+            </div>
+            <% } %>
+                <button type="button">Rzuć</button>
+    </div>
+</div>

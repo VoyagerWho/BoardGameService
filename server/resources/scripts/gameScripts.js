@@ -6,6 +6,9 @@ var socket = new WebSocket(
 
 socket.onopen = function (e) {
 	console.log('Connection established');
+	setInterval(() => {
+		socket.send(JSON.stringify({ action: 'Ping' }));
+	}, 50000);
 };
 
 socket.onmessage = function (event) {
@@ -25,8 +28,14 @@ socket.onmessage = function (event) {
 				}
 				break;
 			case 'Joined':
+			case 'Left':
 				{
 					document.getElementById('playersList').outerHTML = resjson.message;
+				}
+				break;
+			case 'Throw':
+				{
+					window['rollDices' + resjson.board](resjson.dices);
 				}
 				break;
 
@@ -38,6 +47,7 @@ socket.onmessage = function (event) {
 	} else {
 		console.log('Request not accepted');
 	}
+	document.getElementById('wsIndicator').style.backgroundColor = 'limegreen';
 };
 
 socket.onclose = function (event) {
@@ -48,6 +58,7 @@ socket.onclose = function (event) {
 	} else {
 		console.log('Connection died');
 	}
+	document.getElementById('wsIndicator').style.backgroundColor = 'red';
 };
 
 socket.onerror = function (error) {
@@ -60,8 +71,8 @@ function startNewGame() {
 function startNewRound() {
 	socket.send(JSON.stringify({ action: 'NewRound' }));
 }
-function makeMove(move) {
-	socket.send(JSON.stringify({ action: 'Move', move: move }));
+function makeMove(move, board) {
+	socket.send(JSON.stringify({ action: 'Move', move: move, board: board }));
 }
 function update() {
 	socket.send(JSON.stringify({ action: 'Update' }));

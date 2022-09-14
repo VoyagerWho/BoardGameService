@@ -6,7 +6,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const dbusersRouter = require('./routes/dbusers');
 const rooms = require('./routes/rooms');
-const tictactoe = require('../games/TicTacToe-server');
 
 const sessionParser = session({
 	store: MongoStore.create({
@@ -29,36 +28,16 @@ rooms.passSessionParser(sessionParser);
 
 app.use('/users', dbusersRouter);
 app.use('/rooms', rooms.router);
-app.use('/tictactoe', tictactoe.router);
 app.use('/games', (req, res) => {
 	res.redirect(307, '/rooms/games' + req.url);
 });
 
 app.get('/', (req, res) => {
-	res.render('index', { text: ' EJS render!' });
-	//res.redirect("new/url");
+	res.render('index', { text: ' Strona Domowa' });
 });
 
 app.get('/session', (req, res) => {
 	res.end(req.session.working);
-});
-
-app.get('/ttt', (req, res) => {
-	const data = JSON.stringify({
-		uid: 1,
-		message: 'Extra payload',
-	});
-	var options = gameAPI.exampleOptions;
-	options.path = '/Update';
-	options.headers['Content-Length'] = data.length;
-	gameAPI.httpsRequest(options, data, (httpres) => {
-		customLog(`Server status code: ${httpres.statusCode}`);
-		httpres.on('data', (d) => {
-			const resjson = JSON.parse(d.toString());
-			customLog(resjson);
-			res.json(resjson);
-		});
-	});
 });
 
 app.use((req, res, next) => {

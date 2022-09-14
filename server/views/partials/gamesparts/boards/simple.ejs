@@ -1,42 +1,43 @@
-<div id="layout">
-    <%= JSON.stringify(locals.game.board) %>
+<div class="layout">
+    <%= JSON.stringify(locals.board) %>
 </div>
 <script>
-    const nr = <%= locals.game.board.rowCount %>;
-    const nc = <%= locals.game.board.columnCount %>;
-    const tiles = [new Image(), new Image(), new Image()];
-    const tileH = <%=  locals.game.board.tileHeight %>;
-    const tileW = <%=  locals.game.board.tileWidth %>;
-    const layout = JSON.parse(document.getElementById('layout').innerText);
-    const rl = '<%= locals.game.board.rowLabels === 'd' ? '1' : 'a' %>';
-    const cl = '<%= locals.game.board.columnLabels === 'd' ? '1' : 'a' %>';
-    async function loadImages() {
+    const <%='tiles' + locals.index %> =[];
+    const <%= 'layout' + locals.index %> = JSON.parse(document.getElementById('board:<%= locals.index %>').getElementsByClassName('layout')[0].innerText);
+    async function loadImages<%= locals.index %> () {
         const promiseArray = [];
-        layout.textures.forEach((imageUrl, index) => {
+        <%= 'layout' + locals.index %>.textures.forEach((imageUrl, index) => {
             promiseArray.push(new Promise(resolve => {
-                tiles[index].onload = () => {
+                <%='tiles' + locals.index %>.push(new Image());
+                <%='tiles' + locals.index %> [index].onload = () => {
                     resolve();
                 };
 
-                tiles[index].src = imageUrl;
+                <%='tiles' + locals.index %> [index].src = imageUrl;
             }));
         });
         await Promise.all(promiseArray);
         console.log("all images loaded");
         update();
     }
-    loadImages();
-    function updateGUI(state) {
-        document.getElementById('gameStatus').innerHTML = state.gameActiveDesc;
-        document.getElementById('playerRound').innerHTML = state.nextPlayerDesc;
-        const c = document.getElementById('canvas');
+    <%= 'loadImages' + locals.index %> ();
+
+    updateFunctions.push((state) => {
+        const nr = <%= 'layout' + locals.index %>.rowCount;
+        const nc = <%= 'layout' + locals.index %>.columnCount;
+        const tileH = <%= 'layout' + locals.index %>.tileHeight;
+        const tileW = <%= 'layout' + locals.index %>.tileWidth;
+        const rl = <%= 'layout' + locals.index %>.rowLabels === 'd' ? '1' : 'a';
+        const cl = <%= 'layout' + locals.index %>.columnLabels === 'd' ? '1' : 'a';
+        const boardId = <%= locals.index %>;
+        const c = document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0];
         const ctx = c.getContext('2d');
         const height = c.height;
         const width = c.width;
         for (var i = 0; i < nr; ++i) {
             for (var j = 0; j < nc; ++j)
                 ctx.drawImage(
-                    tiles[state.board[nr * i + j] || 0],
+                    <%='tiles' + locals.index %> [state.boards[boardId][nr * i + j] || 0],
                     j * tileW,
                     i * tileH,
                     tileW,
@@ -54,33 +55,48 @@
             ctx.lineTo((i + 1) * tileW, height);
             ctx.stroke();
         }
+    });
 
-        const scoreboard = document.getElementById('scores');
-        for (var i = 0; i < scoreboard.children.length; ++i)
-            scoreboard.children[i].innerHTML = state.score[i].toString();
-    }
-
-    function setup() {
-            <% if (locals.uid !== 0) { %>
-            document.getElementById('canvas').onclick = function (e) {
+    setupFunctions.push(() => {
+        <% if (locals.uid !== 0) { %>
+            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].onclick = function (e) {
+                const tileH = <%= 'layout' + locals.index %>.tileHeight;
+                const tileW = <%= 'layout' + locals.index %>.tileWidth;
+                const rl = <%= 'layout' + locals.index %>.rowLabels === 'd' ? '1' : 'a';
+                const cl = <%= 'layout' + locals.index %>.columnLabels === 'd' ? '1' : 'a';
                 const offsetX = Math.floor(e.offsetX / tileW);
                 const offsetY = Math.floor(e.offsetY / tileH);
-                makeMove(
-                    `${String.fromCharCode(cl.charCodeAt(0) + offsetX)}${String.fromCharCode(
+                if (nextMove === 'choice') {
+                    makeMove(
+                        `${String.fromCharCode(cl.charCodeAt(0) + offsetX)}${String.fromCharCode(
+                            rl.charCodeAt(0) + offsetY
+                        )}`, <%= locals.index %> );
+                }
+                else if (nextMove === 'move') {
+                    const currentClick = `${String.fromCharCode(cl.charCodeAt(0) + offsetX)}${String.fromCharCode(
                         rl.charCodeAt(0) + offsetY
-                    )}`
-                );
-            };
-            <% } %>
-        }
-</script>
-<canvas id="canvas" class="board" width="<%= locals.game.board.tileWidth*locals.game.board.columnCount%>"
-    height="<%= locals.game.board.tileHeight*locals.game.board.rowCount%>">
+                    )}`;
+                    if (lastClick === '') {
+                        lastClick = currentClick;
+                        document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid limegreen';
+                    }
+                    else if (lastClick === currentClick) {
+                        lastClick = '';
+                        document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid #a0a0a0';
+                    }
+                    else {
+                        makeMove(lastClick + '|' + `${String.fromCharCode(cl.charCodeAt(0) + offsetX)}${String.fromCharCode(
+                            rl.charCodeAt(0) + offsetY
+                        )}`, <%= locals.index %>);
+                        lastClick = '';
+                        document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid #a0a0a0';
+                    }
 
+                }
+            };
+        <% } %>
+    });
+</script>
+<canvas class="canvas board" width="<%= locals.board.tileWidth*locals.board.columnCount%>"
+    height="<%= locals.board.tileHeight*locals.board.rowCount%>">
 </canvas>
-<form id="ruch">
-    <input type="button" id="btnGame" value="Nowa Gra" />
-    <input type="button" id="btnRound" value="Nowa Runda" />
-</form>
-<br />
-<%- include('../misc/score.ejs') %>

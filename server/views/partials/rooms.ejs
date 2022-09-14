@@ -1,18 +1,27 @@
-<header><h1>Lista aktywnych pokoi</h1></header>
+<header>
+    <h1>
+        <%= locals.text || 'Lista aktywnych pokoi' %>
+    </h1>
+</header>
 <div id="roomsList">
     <table>
         <thead>
             <tr>
+                <th>Nazwa pokoju</th>
                 <th>Nazwa gry</th>
                 <th>Opis</th>
                 <th>Liczba graczy <br />Liczba obserwatorów</th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            <% locals.rooms.forEach((room, index) => { %>
+            <% locals.rooms.forEach((room, index)=> { %>
                 <tr class="room">
+                    <th>
+                        <%= index %>
+                    </th>
                     <th>
                         <%= room.game.name %>
                     </th>
@@ -21,37 +30,50 @@
                     </td>
                     <td>
                         <%= room.noPlayers %> / <%= room.maxNoPlayers %><br />
-                        <%= room.noObservers%>
+                                <%= room.noObservers%>
                     </td>
                     <td>
                         <form action="/rooms/<%= index %>/Join" method="get">
-                            
-                            <input type="submit" value="Dołącz" 
-                            <% if (room.noPlayers >= room.maxNoPlayers) { %>
-                             disabled
+
+                            <input type="submit" value="Dołącz" <% if (room.noPlayers>= room.maxNoPlayers) { %>
+                            disabled
                             <% } %>
-                            /><br />
-                            
+                                /><br />
+
                         </form>
                     </td>
                     <td>
                         <form action="/rooms/<%= index %>/Observe" method="get">
-                            
+
                             <input type="submit" value="Obserwuj" /><br />
-                            
+
+                        </form>
+                    </td>
+                    <td>
+                        <form action="/rooms/<%= index %>/Close" method="post">
+
+                            <input type="submit" value="Zamknij" /><br />
+
                         </form>
                     </td>
                 </tr>
-            <% }) %>
+                <% }) %>
         </tbody>
     </table>
 </div>
 <footer id="newRoom">
     <form action="/rooms/open" method="post">
-        <select name="gameId">
-            <% locals.games.forEach((game, index) => { %>
-                <option value="<%= index %>" ><%= game.name %> </option>
-            <% }) %>
+        <h2>Otwórz nowy pokój<br /></h2>
+        <label for="name">Nazwa pokoju:</label>
+        <input type="text" name="name" title="Nazwa nowego pokoju" placeholder="Podaj nazwe dla pokoju"
+            value="1" /><br />
+        <label for="gameId">Gra:</label>
+        <select name="gameId" title="Gra w pokoju">
+            <% locals.games.forEach((game, index)=> { %>
+                <option value="<%= index %>" title="<%= game.description%>">
+                    <%= game.name %>
+                </option>
+                <% }) %>
         </select>
         <input type="submit" value="Otwórz" />
     </form>

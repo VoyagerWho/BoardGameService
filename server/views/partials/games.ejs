@@ -1,4 +1,8 @@
-<header><h1>Lista zarejestrowanych gier</h1></header>
+<header>
+    <h1>
+        <%= locals.text || 'Lista gier' %>
+    </h1>
+</header>
 <div id="gamesList">
     <table>
         <thead>
@@ -9,7 +13,7 @@
             </tr>
         </thead>
         <tbody>
-            <% locals.games.forEach((game, index) => { %>
+            <% locals.games.forEach((game, index)=> { %>
                 <tr class="game">
                     <th>
                         <%= game.name %>
@@ -23,34 +27,24 @@
                         </form>
                     </td>
                 </tr>
-            <% }) %>
+                <% }) %>
         </tbody>
     </table>
 </div>
 <footer id="newGame">
-    <script>
-        function checkGame(form)
-        {
-            xmlhttpPost("/games/check", {url: form.url.value}, function (response){
-                var resjson = JSON.parse(response);
-                console.log(resjson);
-                if (resjson.accepted)
-                {
-                    document.getElementById("gameResponse").innerHTML = "Game is OK!";
-                }
-                else
-                {
-                    document.getElementById("gameResponse").innerHTML = "Error has occured!";
-                }
-            });
-        }
-    </script>
-    Zarejestruj nową grę
     <form action="/rooms/games/register" method="post">
+        <h2>Zarejestruj nową grę<br /></h2>
         <label for="url">Adres serwera gry</label>
-        <input id="url" name="url" type="url" placeholder="https://gra.io/" value="<%= locals.url %> " />
-        <input type="button" value="Sprawdź" onclick="checkGame(this.form)" />
+        <input id="url" name="url" type="url" placeholder="https://gra.io/name/api" title="Adres do definicji gry" />
+        <input type="button" value="Sprawdź" onclick="checkGame(this.form)" title="Sprawdzenie poprawności gry" />
         <input type="submit" value="Zarejestruj" />
+        <div id="gameResponse"></div>
     </form>
-    <div id="gameResponse"></div>
+    Dostępne gry:
+    <ul>
+        <li>https://bgs-argen-game-server.herokuapp.com/TicTacToe/api</li>
+        <li>https://bgs-argen-game-server.herokuapp.com/ConnectFour/api</li>
+        <li>https://bgs-argen-game-server.herokuapp.com/ManDontGetAngry/api</li>
+    </ul>
+
 </footer>
