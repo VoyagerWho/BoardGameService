@@ -107,7 +107,18 @@ router.post('/open', (req, res) => {
 		{ room: name },
 		(httpsres) => {
 			httpsres.on('data', (d) => {
-				const data = JSON.parse(d.toString());
+				var data = {};
+				try {
+					data = JSON.parse(d.toString());
+				} catch (error) {
+					customLog(['Error at open', error, d.toString()]);
+					res.render('index', {
+						text: 'Wystąpił problem',
+						middle: 'rooms',
+						rooms: rooms,
+						games: games,
+					});
+				}
 				customLog(['Game Open Response', data]);
 				if (data.accepted) {
 					openRoom(name, game);
@@ -131,7 +142,14 @@ router.post('/open', (req, res) => {
 				}
 			});
 		},
-		null
+		(err) => {
+			customLog(err);
+			res.render('index', {
+				text: 'Wystąpił przy walidacji',
+				middle: 'games',
+				games: games,
+			});
+		}
 	);
 });
 
@@ -157,10 +175,13 @@ router.post('/games/register', (req, res) => {
 				} catch (error) {
 					customLog(['Received Error:', d.toString()]);
 					resjson.accepted = false;
-					res.redirect('/games');
+					res.render('index', {
+						text: 'Wystąpił błąd przy rejestracji',
+						middle: 'games',
+						games: games,
+					});
 					return;
 				}
-				// game parsing
 				if (!resjson.accepted) {
 					customLog(['Register Error', resjson]);
 					res.render('index', {
@@ -193,7 +214,7 @@ router.post('/games/register', (req, res) => {
 		(err) => {
 			customLog(err);
 			res.render('index', {
-				text: 'Wystąpił przy rejestracji',
+				text: 'Wystąpił błąd przy rejestracji',
 				middle: 'games',
 				games: games,
 			});
@@ -218,7 +239,6 @@ router.post('/games/check', (req, res) => {
 			httpsres.on('data', (d) => {
 				try {
 					resjson = JSON.parse(d.toString());
-					//game parsing
 				} catch (error) {
 					customLog(['Received Error:', d.toString()]);
 					res.json({
@@ -243,7 +263,57 @@ router.post('/games/check', (req, res) => {
 });
 
 router.get('/games/check/:id', (req, res) => {
-	res.redirect('/games');
+	const gameName = req.params.id;
+	const game = games.get(gameName);
+	if (game) {
+		gameAPI.status(
+			game,
+			null,
+			(httpsres) => {
+				httpsres.on('data', (d) => {
+					try {
+						resjson = JSON.parse(d.toString());
+					} catch (error) {
+						customLog(['Received Error:', d.toString()]);
+						res.render('index', {
+							middle: 'games',
+							games: games,
+							text: 'Nie prawidłowa odpowiedź',
+						});
+						return;
+					}
+
+					customLog(['Received', resjson]);
+					if (resjson.accepted) {
+						res.render('index', {
+							middle: 'games',
+							games: games,
+							text: 'Gra działa poprawnie',
+						});
+						return;
+					}
+					res.render('index', {
+						middle: 'games',
+						games: games,
+						text: 'Wystąpił błąd',
+					});
+				});
+			},
+			(err) => {
+				customLog(err);
+				res.render('index', {
+					middle: 'games',
+					games: games,
+					text: 'Wystąpił problem z połączeniem',
+				});
+			}
+		);
+	} else
+		res.render('index', {
+			middle: 'games',
+			games: games,
+			text: 'Podana gra nie istnieje',
+		});
 });
 
 router.get('/:id', (req, res) => {
@@ -264,6 +334,7 @@ router.get('/:id', (req, res) => {
 				req.session.rooms[rid].uid == 0
 					? req.session.rooms[rid].oid
 					: undefined,
+			roomHost: req.session.rooms[rid].roomHost,
 		});
 	} else res.redirect('/rooms');
 });

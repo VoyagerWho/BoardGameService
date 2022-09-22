@@ -85,3 +85,13 @@
     box-shadow: 0 0 0 2px #404040, 0 0 0 2px #a0a0a0 inset;
     transition-duration: 0.5s;
 }
+
+.buttonBox {
+    font-weight: bold;
+}
+
+#usersRoles > select {
+    padding-top: 4px;
+    margin-top: 4px;
+    min-width: 200px;
+}

@@ -1,0 +1,33 @@
+<% if (locals.username) { %>
+    <h2>Bieżąca nazwa użytkownika: <%= locals.username %>
+    </h2>
+    <% }else {%>
+        <h2>Nie ma zarejestrowanej nazwy użytkownika</h2>
+        <% } %>
+            <div class="description">Nazwa użytkownika, którą identyfikowany jest użytkownik wewnątrz pokoi<br />
+                Nazwa nie powinna być długości od 4 do 32 znaków</div>
+            <form method="post" action="/login">
+                <label for="username">Nazwa użytkownika:</label>
+                <input name="username" id="username" type="text" placeholder="Podaj nazwę użytkownika ...."
+                    title="Nazwa użytkownika" class="wideInput" /><br />
+                <div id="usernameError" class="error"></div>
+                <input id="submit" type="submit" value="Zastosuj" disabled />
+            </form>
+            <script>
+                document.getElementById('username').onchange = () => {
+                    const value = document.getElementById('username').value.trim();
+                    document.getElementById('usernameError').innerHTML = '';
+                    if (value.length < 4 || value.length > 32) {
+                        document.getElementById('usernameError').innerHTML = 'Nieprawidłowa długość nazwy';
+                        document.getElementById('submit').disabled = true;
+                        return;
+                    }
+                    if (!value.match(/^([^\s<>]+ )*[^\s<>]+$/)) {
+                        document.getElementById('usernameError').innerHTML = 'Nieprawidłowy format nazwy';
+                        document.getElementById('submit').disabled = true;
+                        return;
+                    }
+                    document.getElementById('submit').disabled = false;
+
+                };
+            </script>

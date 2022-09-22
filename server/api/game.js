@@ -11,6 +11,12 @@ const exampleOptions = {
 	},
 };
 
+function customLog(toLog) {
+	console.log('--------------------------------');
+	console.log('GameAPI:');
+	console.log(toLog);
+}
+
 /**
  * Helper function to calculate next side of rolling dice
  * @param {number} side
@@ -168,9 +174,14 @@ function throwDices(desc) {
  */
 function processGameState(state, uid) {
 	console.log(['processGameState', state]);
+	const moveTypes = {
+		move: 'Wykonaj ruch pionkiem',
+		choice: 'Wybierz pole planczy',
+		throw: 'Rzuć kością(kośćmi) do gry',
+	};
 	if (state.state.gameActive) {
 		if (state.nextPlayer === uid)
-			state.nextPlayerDesc = `Twój ruch - wykonaj ${state.nextMove}`;
+			state.nextPlayerDesc = `Twój ruch - ${moveTypes[state.nextMove]}`;
 		else state.nextPlayerDesc = `Ruch Gracza Player${state.nextPlayer}`;
 		state.gameActiveDesc = 'Runda rozpoczęta';
 	} else {
@@ -331,7 +342,12 @@ function updateAll(rid, room) {
 			options.headers['Content-Length'] = data.length;
 			httpsRequest(options, data, (res) => {
 				res.on('data', (d) => {
-					const httpsres = JSON.parse(d.toString());
+					var httpsres = {};
+					try {
+						httpsres = JSON.parse(d.toString());
+					} catch (error) {
+						customLog(['Error at updateAll', error, d.toString()]);
+					}
 					if (httpsres.accepted) {
 						const resjson = processGameState(httpsres, index);
 						// swap single instance to array
@@ -353,7 +369,12 @@ function updateAll(rid, room) {
 		options.headers['Content-Length'] = data.length;
 		httpsRequest(options, data, (res) => {
 			res.on('data', (d) => {
-				const httpsres = JSON.parse(d.toString());
+				var httpsres = {};
+				try {
+					httpsres = JSON.parse(d.toString());
+				} catch (error) {
+					customLog(['Error at updateAll', error, d.toString()]);
+				}
 				if (httpsres.accepted) {
 					const resjson = processGameState(httpsres, 0);
 					// swap single instance to array
@@ -387,4 +408,3 @@ module.exports.updateAll = updateAll;
 module.exports.processGameState = processGameState;
 module.exports.exampleOptions = exampleOptions;
 module.exports.throwDices = throwDices;
-module.exports.status = status;

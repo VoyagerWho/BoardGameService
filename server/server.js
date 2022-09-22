@@ -26,7 +26,6 @@ app.use(bodyParser.json());
 app.use(sessionParser);
 rooms.passSessionParser(sessionParser);
 
-app.use('/users', dbusersRouter);
 app.use('/rooms', rooms.router);
 app.use('/games', (req, res) => {
 	res.redirect(307, '/rooms/games' + req.url);
@@ -36,9 +35,42 @@ app.get('/', (req, res) => {
 	res.render('index', { text: ' Strona Domowa' });
 });
 
-app.get('/session', (req, res) => {
-	res.end(req.session.working);
-});
+app
+	.route('/login')
+	.get((req, res) => {
+		res.render('index', {
+			middle: 'login',
+			text: 'Panel logowania',
+			username: req.session.username,
+		});
+	})
+	.post((req, res) => {
+		if (!req.body.username) {
+			res.render('index', {
+				middle: 'login',
+				text: 'Niekompletny formularz!',
+				username: req.session.username,
+			});
+			return;
+		}
+		if (
+			!typeof req.body.username === 'string' ||
+			!req.body.username.match(/^([^\s<>]+ )*[^\s<>]+$/)
+		) {
+			res.render('index', {
+				middle: 'login',
+				text: 'Nieprawidłowe dane formularza!',
+				username: req.session.username,
+			});
+			return;
+		}
+		req.session.username = req.body.username;
+		res.render('index', {
+			middle: 'login',
+			text: 'Nazwa użytkownika nadana prawidłowo',
+			username: req.session.username,
+		});
+	});
 
 app.use((req, res, next) => {
 	res.status(404);
@@ -59,11 +91,6 @@ function logger(req, res, next) {
 const port = process.env.PORT || process.argv[2] || 80;
 var server = app.listen(port, () => {
 	customLog('App listening');
-});
-
-server.on('close', () => {
-	client.close();
-	customLog('DB Disconnetced!');
 });
 
 server.on('upgrade', (request, socket, head) => {

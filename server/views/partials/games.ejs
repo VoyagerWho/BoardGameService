@@ -23,7 +23,7 @@
                     </td>
                     <td>
                         <form action="/rooms/games/check/<%= index %>" method="get">
-                            <input type="submit" value="Sprawdź dostępność" disabled /><br />
+                            <input type="submit" value="Sprawdź dostępność" /><br />
                         </form>
                     </td>
                 </tr>
@@ -34,17 +34,12 @@
 <footer id="newGame">
     <form action="/rooms/games/register" method="post">
         <h2>Zarejestruj nową grę<br /></h2>
-        <label for="url">Adres serwera gry</label>
-        <input id="url" name="url" type="url" placeholder="https://gra.io/name/api" title="Adres do definicji gry" />
+        <label for="url">Adres serwera gry:</label>
+        <input id="url" name="url" type="url" placeholder="https://gra.io/name/api" title="Adres do definicji gry"
+            value="https://localhost:8443/Statki/api" /> <br />
         <input type="button" value="Sprawdź" onclick="checkGame(this.form)" title="Sprawdzenie poprawności gry" />
         <input type="submit" value="Zarejestruj" />
         <div id="gameResponse"></div>
     </form>
-    Dostępne gry:
-    <ul>
-        <li>https://bgs-argen-game-server.herokuapp.com/TicTacToe/api</li>
-        <li>https://bgs-argen-game-server.herokuapp.com/ConnectFour/api</li>
-        <li>https://bgs-argen-game-server.herokuapp.com/ManDontGetAngry/api</li>
-    </ul>
 
 </footer>

@@ -123,3 +123,12 @@ form > h2 {
 footer{
     margin-top: 5px;
 }
+
+.wideInput {
+	width: 400px;
+}
+
+.error {
+	color: yellow;
+	font-weight: bold;
+}

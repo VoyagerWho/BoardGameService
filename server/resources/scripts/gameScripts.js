@@ -65,12 +65,6 @@ socket.onerror = function (error) {
 	console.log(`${error.message}`);
 };
 
-function startNewGame() {
-	socket.send(JSON.stringify({ action: 'NewGame' }));
-}
-function startNewRound() {
-	socket.send(JSON.stringify({ action: 'NewRound' }));
-}
 function makeMove(move, board) {
 	socket.send(JSON.stringify({ action: 'Move', move: move, board: board }));
 }
@@ -79,7 +73,5 @@ function update() {
 }
 
 function onBodyLoad() {
-	document.getElementById('btnGame').onclick = startNewGame;
-	document.getElementById('btnRound').onclick = startNewRound;
 	setup();
 }

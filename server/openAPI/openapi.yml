@@ -22,6 +22,8 @@ components:
       properties:
         accepted:
           type: boolean
+        message:
+          type: string
         board:
           $ref: '#/components/schemas/boardData'
         boards:
@@ -58,6 +60,7 @@ components:
           minimum: 1
       required:
         - accepted
+        - message
         - score
         - state
         - nextMove
@@ -66,16 +69,15 @@ components:
       type: array
       minItems: 1
       items:
-        type: string
-        minLength: 1
-        maxLength: 1
-    tableBoard:
+        type: integer
+        minimum: 0
+    simpleBoard:
       type: object
       properties:
         type:
           type: string
           enum:
-            - table
+            - simple
         rowCount:
           type: integer
           minimum: 1
@@ -94,72 +96,182 @@ components:
           enum:
             - d
             - l
+        tileWidth:
+          type: integer
+          minimum: 0
+        tileHeight:
+          type: integer
+          minimum: 0
+        textures:
+          type: array
+          items:
+            type: string
+          minItems: 2
       required:
         - type
         - rowCount
         - rowLabels
         - columnCount
         - columnLabels
+        - tileWidth
+        - tileHeight
+        - textures
+    customBoard:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - custom
+        tileWidth:
+          type: integer
+          minimum: 0
+        tileHeight:
+          type: integer
+          minimum: 0
+        width:
+          type: integer
+          minimum: 0
+        height:
+          type: integer
+          minimum: 0
+        background:
+          type: object
+          properties:
+            color:
+              type: string
+            image:
+              type: string
+        textures:
+          type: array
+          items:
+            type: string
+          minItems: 2
+        tiles:
+          type: array
+          items:
+            type: object
+            properties:
+              x:
+                type: integer
+                minimum: 0
+              y:
+                type: integer
+                minimum: 0
+              name:
+                type: string
+            required:
+              - x
+              - y
+              - name
+      required:
+        - tileWidth
+        - tileHeight
+        - width
+        - height
+        - background
+        - textures
+        - tiles
+    randomBoard:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - random
+        real:
+          type: boolean
+        numberOfSides:
+          type: integer
+          minimum: 2
+        numberOfDices:
+          type: integer
+          minimum: 1
+        rotations:
+          type: integer
+          minimum: 1
+      required:
+        - type
+        - real
+        - numberOfDices
+        - rotations
     GameAPI:
       type: object
       properties:
-        name:
-          type: string
-        hostname:
-          type: string
-          format: hostname
-        port:
-          type: integer
-          minimum: 1
-          maximum: 65535
-        description:
-          type: string
-        maxNoPlayers:
-          type: integer
-          minimum: 2
-        board:
-          oneOf:
-            - $ref: '#/components/schemas/tableBoard'
-        boards:
-          type: array
-          minItems: 1
-          items:
-            oneOf:
-              - $ref: '#/components/schemas/tableBoard'
+        accepted:
+          type: boolean
         api:
           type: object
           properties:
-            API:
+            name:
               type: string
-            NewGame:
+              pattern: '^(?:(?![<>]).)*$'
+            hostname:
               type: string
-            NewRound:
+              format: hostname
+            port:
+              type: integer
+              minimum: 1
+              maximum: 65535
+            description:
               type: string
-            Move:
-              type: string
-            Update:
-              type: string
-            Status:
-              type: string
-            Open:
-              type: string
-            Close:
-              type: string
+              pattern: '^(?:(?![<>]).)*$'
+            minNoPlayers:
+              type: integer
+              minimum: 1
+            maxNoPlayers:
+              type: integer
+              minimum: 1
+            board:
+              anyOf:
+                - $ref: '#/components/schemas/simpleBoard'
+                - $ref: '#/components/schemas/customBoard'
+                - $ref: '#/components/schemas/randomBoard'
+            boards:
+              type: array
+              minItems: 1
+              items:
+                anyOf:
+                  - $ref: '#/components/schemas/simpleBoard'
+                  - $ref: '#/components/schemas/customBoard'
+                  - $ref: '#/components/schemas/randomBoard'
+            api:
+              type: object
+              properties:
+                API:
+                  type: string
+                NewGame:
+                  type: string
+                NewRound:
+                  type: string
+                Move:
+                  type: string
+                Update:
+                  type: string
+                Status:
+                  type: string
+                Open:
+                  type: string
+                Close:
+                  type: string
+              required:
+                - API
+                - NewGame
+                - NewRound
+                - Move
+                - Update
+                - Status
+                - Open
+                - Close
           required:
-            - API
-            - NewGame
-            - NewRound
-            - Move
-            - Update
-            - Status
-            - Open
-            - Close
+            - name
+            - hostname
+            - port
+            - description
+            - maxNoPlayers
+            - api
       required:
-        - name
-        - hostname
-        - port
-        - description
-        - maxNoPlayers
+        - accepted
         - api
     RoomID:
       type: object
@@ -178,10 +290,42 @@ components:
           minimum: 1
         move:
           type: string
+        board:
+          type: integer
+          minimum: 0
+        dices:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+            minItems: 2
+          minItems: 1
       required:
         - room
         - player
         - move
+        - board
+    MoveResponse:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+        message:
+          type: string
+        dices:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+            minItems: 2
+          minItems: 1
+      required:
+        - accepted
+        - message
     Update:
       type: object
       properties:
@@ -193,6 +337,53 @@ components:
       required:
         - room
         - player
+    NewGame:
+      type: object
+      properties:
+        room:
+          type: string
+        players:
+          type: integer
+          minimum: 1
+      required:
+        - room
+        - players
+    Status:
+      type: object
+      properties:
+        room:
+          type: string
+    RoomState:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+        score:
+          type: array
+          minItems: 3
+          items:
+            type: integer
+            minimum: 0
+        state:
+          type: object
+          properties:
+            gameActive:
+              type: boolean
+            playerWon:
+              type: integer
+              minimum: 1
+            draw:
+              type: boolean
+          required:
+            - gameActive
+        message:
+          type: string
+      required:
+        - accepted
+        - score
+        - state
+        - message
+
   parameters:
     GameName:
       name: GameName
@@ -229,15 +420,27 @@ components:
         application/x-www-form-urlencoded:
           schema:
             $ref: '#/components/schemas/Update'
+    NewGame:
+      description: Number of Players
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewGame'
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/NewGame'
+    Status:
+      description: Room identifier to be accessed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Status'
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/Status'
   responses:
-    NotFound:
-      description: Entity not found.
-    IllegalInput:
-      description: Illegal input for operation.
-    GeneralError:
-      description: General Error
     Plain:
-      description: Basic response for valid request
+      description: Basic response for request
       content:
         application/json:
           schema:
@@ -247,7 +450,7 @@ components:
       content:
         application/json:
           schema:
-            oneOf:
+            anyOf:
               - $ref: '#/components/schemas/GameAPI'
               - $ref: '#/components/schemas/PlainResponse'
     GameState:
@@ -255,16 +458,22 @@ components:
       content:
         application/json:
           schema:
-            oneOf:
+            anyOf:
               - $ref: '#/components/schemas/GameState'
               - $ref: '#/components/schemas/PlainResponse'
+    Move:
+      description: Response for valid move
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MoveResponse'
     Status:
       description: Room status.
       content:
         application/json:
           schema:
-            oneOf:
-              - $ref: '#/components/schemas/GameState' # !!! wrong !!!
+            anyOf:
+              - $ref: '#/components/schemas/RoomState'
               - $ref: '#/components/schemas/PlainResponse'
 paths:
   /:
@@ -326,7 +535,7 @@ paths:
         Get status information of the instance of the game
         Data used by Room server
       requestBody:
-        $ref: '#/components/requestBodies/RoomID'
+        $ref: '#/components/requestBodies/Status'
       responses:
         '200':
           $ref: '#/components/responses/Status'
@@ -338,7 +547,7 @@ paths:
       description: |
         Start new game on the instance and clear all data from previous game
       requestBody:
-        $ref: '#/components/requestBodies/RoomID'
+        $ref: '#/components/requestBodies/NewGame'
       responses:
         '200':
           $ref: '#/components/responses/Plain'
@@ -365,7 +574,7 @@ paths:
         $ref: '#/components/requestBodies/Move'
       responses:
         '200':
-          $ref: '#/components/responses/Plain'
+          $ref: '#/components/responses/Move'
   /{GameName}/Update:
     parameters:
       - $ref: '#/components/parameters/GameName'

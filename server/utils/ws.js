@@ -104,7 +104,7 @@ function updateUsersList(room, mode) {
  * Handler for socket messages
  * @param {ws.WebSocket} socket
  * @param {IncomingMessage} req
- * @param {JSON} messjson
+ * @param {{action: string, move: string, roles: string[] }} messjson
  */
 function handleMessage(socket, req, messjson) {
 	var roomStats = {};
@@ -125,44 +125,126 @@ function handleMessage(socket, req, messjson) {
 	switch (messjson.action) {
 		case 'NewGame':
 			{
-				gameAPI.startNewGame(
-					room.game,
-					{
-						room: rid,
-						player: req.session.rooms[rid].uid,
-						players: Math.max(room.minNoPlayers, room.noPlayers),
-					},
-					(httpsres) => {
-						httpsres.on('data', (d) => {
-							const data = JSON.parse(d.toString());
-							resjson.accepted = data.accepted;
-							resjson.message = data.message;
-							customLog(resjson);
-							socket.send(JSON.stringify(resjson));
+				if (req.session.rooms[rid].roomHost) {
+					if (messjson.roles[0]) {
+						try {
+							messjson.roles.forEach((element, index) => {
+								if (!element.match(/^([uo]\d+)?$/)) throw 'Incorrect role';
+								if (
+									element &&
+									messjson.roles.slice(index + 1).find((e) => {
+										e === element;
+									})
+								)
+									throw 'Double role';
+							});
+						} catch (error) {
+							console.error(error);
+							return;
+						}
+						const roles = [];
+						messjson.roles.forEach((element) => {
+							if (element)
+								roles.push({
+									type: element[0],
+									id: new Number(element.slice(1)),
+								});
+							else roles.push({ type: '' });
 						});
-					},
-					null
-				);
-				gameAPI.updateAll(rid, room);
+						var temp = {};
+						const newPlayers = [];
+						roles.forEach((element, index) => {
+							if (element.type === 'u') {
+								newPlayers[index + 1] = room.players[element.id];
+								room.players[element.id] = undefined;
+								newPlayers[index + 1].session.rooms[rid].uid = index + 1;
+								newPlayers[index + 1].session.save();
+							} else if (element.type === 'o') {
+								newPlayers[index + 1] = room.observers[element.id];
+								room.observers[element.id] = undefined;
+								newPlayers[index + 1].session.rooms[rid].uid = index + 1;
+								newPlayers[index + 1].session.rooms[rid].oid = undefined;
+								newPlayers[index + 1].session.save();
+							}
+						});
+						var id = 0;
+						room.players.forEach((element) => {
+							if (element) {
+								while (room.observers[id]) {
+									++id;
+								}
+								room.observers[id] = element;
+								element.session.rooms[rid].uid = 0;
+								element.session.rooms[rid].oid = id;
+								element.session.save();
+							}
+						});
+						room.players = newPlayers;
+						var id = 0;
+						room.players.forEach((element) => {
+							if (element) ++id;
+						});
+						room.noPlayers = id;
+
+						var id = 0;
+						room.observers.forEach((element) => {
+							if (element) ++id;
+						});
+						room.noObservers = id;
+						updateUsersList(room);
+					}
+					gameAPI.startNewGame(
+						room.game,
+						{
+							room: rid,
+							players: Math.max(room.minNoPlayers, room.noPlayers),
+						},
+						(httpsres) => {
+							httpsres.on('data', (d) => {
+								var data = {};
+								try {
+									data = JSON.parse(d.toString());
+								} catch (error) {
+									customLog(['Error at NewGame', error, d.toString()]);
+									return;
+								}
+								resjson.accepted = data.accepted;
+								resjson.message = data.message;
+								customLog(resjson);
+								socket.send(JSON.stringify(resjson));
+							});
+						},
+						null
+					);
+					gameAPI.updateAll(rid, room);
+				}
 			}
 			break;
 		case 'NewRound':
 			{
-				gameAPI.startNewRound(
-					room.game,
-					{ room: rid, player: req.session.rooms[rid].uid },
-					(httpsres) => {
-						httpsres.on('data', (d) => {
-							const data = JSON.parse(d.toString());
-							resjson.accepted = data.accepted;
-							resjson.message = data.message;
-							customLog(resjson);
-							socket.send(JSON.stringify(resjson));
-						});
-					},
-					null
-				);
-				gameAPI.updateAll(rid, room);
+				if (req.session.rooms[rid].roomHost) {
+					gameAPI.startNewRound(
+						room.game,
+						{ room: rid },
+						(httpsres) => {
+							httpsres.on('data', (d) => {
+								var data = {};
+								try {
+									data = JSON.parse(d.toString());
+								} catch (error) {
+									customLog(['Error at NewRound', error, d.toString()]);
+									return;
+								}
+								resjson.accepted = data.accepted;
+								resjson.message = data.message;
+								customLog(resjson);
+								socket.send(JSON.stringify(resjson));
+							});
+						},
+						null
+					);
+					gameAPI.updateAll(rid, room);
+				}
 			}
 			break;
 		case 'Move':
@@ -182,7 +264,13 @@ function handleMessage(socket, req, messjson) {
 						apiMess,
 						(httpsres) => {
 							httpsres.on('data', (d) => {
-								const data = JSON.parse(d.toString());
+								var data = {};
+								try {
+									data = JSON.parse(d.toString());
+								} catch (error) {
+									customLog(['Error at Move', error, d.toString()]);
+									return;
+								}
 								resjson.accepted = data.accepted;
 								resjson.message = data.message;
 								resjson.dices = dices;
@@ -200,7 +288,13 @@ function handleMessage(socket, req, messjson) {
 						apiMess,
 						(httpsres) => {
 							httpsres.on('data', (d) => {
-								const data = JSON.parse(d.toString());
+								var data = {};
+								try {
+									data = JSON.parse(d.toString());
+								} catch (error) {
+									customLog(['Error at Move', error, d.toString()]);
+									return;
+								}
 								resjson.accepted = data.accepted;
 								resjson.message = data.message;
 								customLog(resjson);
@@ -220,7 +314,13 @@ function handleMessage(socket, req, messjson) {
 					{ room: rid, player: req.session.rooms[rid].uid },
 					(httpsres) => {
 						httpsres.on('data', (d) => {
-							const data = JSON.parse(d.toString());
+							var data = {};
+							try {
+								data = JSON.parse(d.toString());
+							} catch (error) {
+								customLog(['Error at Update', error, d.toString()]);
+								return;
+							}
 							if (data.accepted) {
 								resjson = gameAPI.processGameState(
 									data,
@@ -278,7 +378,11 @@ wsServer.on('connection', (socket, req) => {
 			resjson.response = 'Role assigned successfully';
 			if (uid !== 0) {
 				if (uid > 0 && room.players[uid] === undefined) {
-					room.players[uid] = { socket: socket };
+					room.players[uid] = {
+						socket: socket,
+						username: req.session.username,
+						session: req.session,
+					};
 					++room.noPlayers;
 					resjson.description = 'Player' + uid + ' connected';
 					noRole = false;
@@ -288,7 +392,11 @@ wsServer.on('connection', (socket, req) => {
 					while (room.players[id]) {
 						++id;
 					}
-					room.players[id] = { socket: socket };
+					room.players[id] = {
+						socket: socket,
+						username: req.session.username,
+						session: req.session,
+					};
 					++room.noPlayers;
 					req.session.rooms[rid].uid = id;
 					resjson.description = 'Player' + id + ' connected';
@@ -302,9 +410,17 @@ wsServer.on('connection', (socket, req) => {
 				}
 				req.session.rooms[rid].uid = 0;
 				req.session.rooms[rid].oid = id;
-				room.observers[id] = { socket: socket };
+				room.observers[id] = {
+					socket: socket,
+					username: req.session.username,
+					session: req.session,
+				};
 				++room.noObservers;
 				resjson.description = 'Observer';
+			}
+			if (!room.host) {
+				room.host = true;
+				req.session.rooms[rid].roomHost = true;
 			}
 			req.session.save();
 		} else {
@@ -312,6 +428,7 @@ wsServer.on('connection', (socket, req) => {
 			resjson.response = 'Failed to assign the role';
 			resjson.resone = 'Incorrect room id: ' + rid;
 		}
+
 		console.log('Role assigned');
 		socket.send(JSON.stringify(resjson));
 		updateUsersList(room);
@@ -320,7 +437,8 @@ wsServer.on('connection', (socket, req) => {
 			try {
 				messjson = JSON.parse(message.toString());
 			} catch (error) {
-				messjson = { message: message.toString() };
+				customLog(['Error on WS message', error, message.toString()]);
+				return;
 			}
 			customLog(messjson);
 			handleMessage(socket, req, messjson);
@@ -335,6 +453,11 @@ wsServer.on('connection', (socket, req) => {
 			} else {
 				room.players[uid] = undefined;
 				--room.noPlayers;
+			}
+			if (req.session.rooms[rid].roomHost) {
+				room.host = false;
+				req.session.rooms[rid].roomHost = false;
+				req.session.save();
 			}
 			updateUsersList(room, 'Left');
 		});
