@@ -5,6 +5,7 @@ const games = {
 	TicTacToe: require('./TicTacToeFiles/TicTacToe'),
 	ConnectFour: require('./ConnectFourFiles/ConnectFour'),
 	ManDontGetAngry: require('./ManDGAFiles/ManDGA'),
+	Statki: require('./BattleshipsFiles/Battleships'),
 };
 const OpenApiValidator = require('express-openapi-validator');
 const https = require('https');
@@ -15,6 +16,14 @@ const rooms = new Map();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(logger);
+
+app.use(
+	OpenApiValidator.middleware({
+		apiSpec: './openAPI/openapi.yml',
+		validateRequests: true, // (default)
+		validateResponses: true, // false by default
+	})
+);
 
 /**
  * Middleware function for logging URL
@@ -30,7 +39,7 @@ function logger(req, res, next) {
  */
 function customLog(toLog) {
 	console.log('--------------------------------');
-	console.log('GameServer server:');
+	console.log('GameServer:');
 	console.log(toLog);
 }
 
@@ -38,25 +47,20 @@ function customLog(toLog) {
 // Game engine API
 //-----------------------------------------------------------------------------
 
-// app.use(
-// 	OpenApiValidator.middleware({
-// 		apiSpec: './openAPI/openapi.yml',
-// 		validateRequests: true, // (default)
-// 		validateResponses: true, // false by default
-// 	})
-// );
 app.get('/', (req, res) => {
 	res.sendFile('index.html', { root: __dirname });
 });
 
 app.post('/:GameName/Open', (req, res) => {
 	const gameName = req.params.GameName;
+	const game = games[gameName];
+	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	if (!rooms.get(roomName)) {
-		rooms.set(roomName, games[gameName].openRoom());
+		rooms.set(roomName, game.openRoom());
 		customLog(['Opened room', rooms]);
 		res.json({ accepted: true, message: 'New room opened' });
 	} else res.json({ accepted: false, message: 'Room exists!' });
@@ -64,6 +68,8 @@ app.post('/:GameName/Open', (req, res) => {
 
 app.post('/:GameName/Close', (req, res) => {
 	const gameName = req.params.GameName;
+	const game = games[gameName];
+	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = '#' + rid;
@@ -72,37 +78,43 @@ app.post('/:GameName/Close', (req, res) => {
 		rooms.delete(roomName);
 		customLog(['Closed room', rooms]);
 		res.json({ accepted: true, message: 'Room closed' });
-	} else res.json({ accepted: false, message: "Room doesn't exists!" });
+	} else res.json({ accepted: true, message: "Room doesn't exists!" });
 });
 
 app.post('/:GameName/NewGame', (req, res) => {
 	const gameName = req.params.GameName;
+	const game = games[gameName];
+	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
-		games[gameName].startNewGame(room, req.body.players);
+		game.startNewGame(room, req.body.players);
 		res.json({ accepted: true, message: 'New game started!' });
 	} else res.json({ accepted: false, message: "Room doesn't exists!" });
 });
 
 app.post('/:GameName/NewRound', (req, res) => {
 	const gameName = req.params.GameName;
+	const game = games[gameName];
+	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	const room = rooms.get(roomName);
 	if (room) {
-		games[gameName].startNewRound(room);
+		game.startNewRound(room);
 		res.json({ accepted: true, message: 'New round started!' });
 	} else res.json({ accepted: false, message: "Room doesn't exists!" });
 });
 
 app.post('/:GameName/Move', (req, res) => {
 	const gameName = req.params.GameName;
+	const game = games[gameName];
+	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = '#' + rid;
@@ -112,7 +124,7 @@ app.post('/:GameName/Move', (req, res) => {
 		const pid = req.body.player;
 		const move = req.body.move;
 		if (move === 'throw') {
-			if (games[gameName].updateGame(room, pid, move, req.body.dices))
+			if (game.updateGame(room, pid, move, req.body.dices))
 				res.json({
 					accepted: true,
 					message: 'Throw accepted',
@@ -121,7 +133,7 @@ app.post('/:GameName/Move', (req, res) => {
 			else res.json({ accepted: false, message: 'Incorrect move data' });
 			return;
 		}
-		if (games[gameName].updateGame(room, pid, move))
+		if (game.updateGame(room, pid, move))
 			res.json({ accepted: true, message: 'Move accepted' });
 		else res.json({ accepted: false, message: 'Incorrect move data' });
 	} else res.json({ accepted: false, message: "Room doesn't exists!" });
@@ -130,6 +142,8 @@ app.post('/:GameName/Move', (req, res) => {
 
 app.post('/:GameName/Update', (req, res) => {
 	const gameName = req.params.GameName;
+	const game = games[gameName];
+	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
 	const rid = req.body.room;
 	const host = req.ip;
 	const roomName = '#' + rid;
@@ -137,15 +151,42 @@ app.post('/:GameName/Update', (req, res) => {
 	const room = rooms.get(roomName);
 	if (room) {
 		const player = req.body.player;
-		//customLog(['Update data', req.body]);
-		const data = games[gameName].getUpdate(room, player);
-		if (Object.keys(data).length)
+		const data = game.getUpdate(room, player);
+		if (Object.keys(data).length) {
+			customLog([
+				'response:',
+				{
+					...{ accepted: true, message: 'Request successful' },
+					...data,
+				},
+			]);
 			res.json({
 				...{ accepted: true, message: 'Request successful' },
 				...data,
 			});
-		else res.json({ accepted: false, message: 'Request unsuccessful' });
+		} else res.json({ accepted: false, message: 'Request unsuccessful' });
 	} else res.json({ accepted: false, message: "Room doesn't exists!" });
+});
+
+app.post('/:GameName/Status', (req, res) => {
+	const gameName = req.params.GameName;
+	const game = games[gameName];
+	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
+	const rid = req.body.room;
+	if (rid) {
+		const host = req.ip;
+		const roomName = '#' + rid;
+		console.log([roomName, req.body]);
+		const room = rooms.get(roomName);
+		if (room) {
+			const data = game.getStatus(room);
+			res.json({
+				...{ accepted: true, message: 'Room active' },
+				...data,
+			});
+		} else res.json({ accepted: true, message: "Room doesn't exists!" });
+	}
+	res.json({ accepted: true, message: 'Server online!' });
 });
 
 //-----------------------------------------------------------------------------
@@ -354,16 +395,87 @@ const description = {
 			Close: '/ManDontGetAngry/Close',
 		},
 	},
+	Statki: {
+		name: 'Statki',
+		hostname: hostname,
+		port: 443,
+		description: 'Dwuosobowa gra w statki',
+		maxNoPlayers: 2,
+		minNoPlayers: 2,
+		boards: [
+			{
+				type: 'simple',
+				rowCount: 8,
+				rowLabels: 'd',
+				columnCount: 8,
+				columnLabels: 'l',
+				tileWidth: 64,
+				tileHeight: 64,
+				textures: [
+					'/static/images/textures/Tile1.png',
+					'/static/images/textures/Tile1p1.png',
+					'/static/images/textures/Tile1p2.png',
+					'/static/images/textures/Tile1s.png',
+					'/static/images/textures/Tile1sp1.png',
+					'/static/images/textures/Tile1sp2.png',
+				],
+			},
+			{
+				type: 'simple',
+				rowCount: 8,
+				rowLabels: 'd',
+				columnCount: 8,
+				columnLabels: 'l',
+				tileWidth: 64,
+				tileHeight: 64,
+				textures: [
+					'/static/images/textures/Tile1.png',
+					'/static/images/textures/Tile1p1.png',
+					'/static/images/textures/Tile1p2.png',
+					'/static/images/textures/Tile1s.png',
+					'/static/images/textures/Tile1sp1.png',
+					'/static/images/textures/Tile1sp2.png',
+				],
+			},
+		],
+		api: {
+			API: '/Statki/api',
+			NewGame: '/Statki/NewGame',
+			NewRound: '/Statki/NewRound',
+			Move: '/Statki/Move',
+			Update: '/Statki/Update',
+			Status: '/Statki/Status',
+			Open: '/Statki/Open',
+			Close: '/Statki/Close',
+		},
+	},
 };
 
 app
 	.route('/:GameName/api')
 	.get((req, res) => {
+		if (!description[req.params.GameName]) {
+			res.json({ accepted: false, message: 'Gra nie istnieje!' });
+			return;
+		}
 		res.json({ accepted: true, api: description[req.params.GameName] });
 	})
 	.post((req, res) => {
+		if (!description[req.params.GameName]) {
+			res.json({ accepted: false, message: 'Gra nie istnieje!' });
+			return;
+		}
 		res.json({ accepted: true, api: description[req.params.GameName] });
 	});
+
+app.use((err, req, res, next) => {
+	// format error
+	customLog(err);
+	res.status(err.status || 500).json({
+		accepted: false,
+		message: err.message,
+	});
+});
 
 var server = app.listen(port, () => {
 	customLog('App listening');

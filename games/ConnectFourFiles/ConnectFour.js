@@ -93,16 +93,25 @@ function startNewRound(room) {
  * @returns {object} json representation of game state
  */
 function getUpdate(room, playerId) {
-	if (typeof playerId == 'number') {
-		return {
-			board: [].concat(...room.board),
-			score: room.score,
-			state: room.state,
-			nextMove: 'choice',
-			nextPlayer: room.player,
-		};
-	}
-	return {};
+	return {
+		board: [].concat(...room.board),
+		score: room.score,
+		state: room.state,
+		nextMove: 'choice',
+		nextPlayer: room.player,
+	};
+}
+
+/**
+ * Function to return status of the room
+ * @param {Room} room
+ * @returns {{score: number[], state: State}}
+ */
+function getStatus(room) {
+	return {
+		score: room.score,
+		state: room.state,
+	};
 }
 
 /**
@@ -180,8 +189,6 @@ function checkIfDraw(room) {
 function makeMove(room, playerId, position) {
 	try {
 		if (!room.state.gameActive) throw 'Game inactive!';
-		if (typeof position !== 'string' || typeof playerId !== 'number')
-			throw 'Incorrect parameter type!';
 
 		if (playerId !== room.player) throw 'Wrong player id: ' + playerId;
 
@@ -238,6 +245,7 @@ function updateGame(room, playerId, position) {
 module.exports.startNewGame = startNewGame;
 module.exports.startNewRound = startNewRound;
 module.exports.getUpdate = getUpdate;
+module.exports.getStatus = getStatus;
 module.exports.makeMove = makeMove;
 module.exports.updateGame = updateGame;
 module.exports.openRoom = openRoom;

@@ -13,10 +13,29 @@ function customLog(toLog) {
 //-----------------------------------------------------------------------------
 
 /**
- * Function to create new empty game instance for room
- * @returns {JSON} game instance
+ * @typedef State
+ * @type {object}
+ * @property {boolean} gameActive
+ * @property {number} [playerWon]
+ * @property {boolean} [draw]
  */
-function openRoom() {
+
+/**
+ * @typedef Room
+ * @type {object}
+ * @property {number[]} board - Array representing game board 3x3 as 1D array
+ * @property {number} player - Number representing last player
+ * @property {number} playerBegin - Number representing player who started last round
+ * @property {number[]} score - Array representing game score as [ties, wins of player 1, wins of player 2]
+ * @property {State} state - Object representing state of the game
+ */
+
+/**
+ * Function to create new empty game instance for room
+ * @param {number} [players=2] - Number of players
+ * @returns {Room} game instance
+ */
+function openRoom(players) {
 	return {
 		/**
 		 * Array representing game board
@@ -83,20 +102,29 @@ function startNewRound(room) {
  * @returns {object} json representation of game state
  */
 function getUpdate(room, playerId) {
-	if (typeof playerId == 'number') {
-		return {
-			boards: [
-				room.board,
-				[0, 1, 2, 0, 2, 1, 1, 2, 0],
-				[0, 1, 0, 2, 0, 2, 0, 1, 0],
-			],
-			score: room.score,
-			state: room.state,
-			nextMove: 'choice',
-			nextPlayer: room.player,
-		};
-	}
-	return {};
+	return {
+		boards: [
+			room.board,
+			[0, 1, 2, 0, 2, 1, 1, 2, 0],
+			[0, 1, 0, 2, 0, 2, 0, 1, 0],
+		],
+		score: room.score,
+		state: room.state,
+		nextMove: 'choice',
+		nextPlayer: room.player,
+	};
+}
+
+/**
+ * Function to return status of the room
+ * @param {Room} room
+ * @returns {{score: number[], state: State}}
+ */
+function getStatus(room) {
+	return {
+		score: room.score,
+		state: room.state,
+	};
 }
 
 /**
@@ -159,20 +187,18 @@ function checkIfDraw(room) {
 function makeMove(room, playerId, position) {
 	try {
 		if (!room.state.gameActive) throw 'Game inactive!';
-		if (typeof position != 'string' || typeof playerId != 'number')
-			throw 'Incorrect parameter type!';
 
 		if (playerId !== room.player) throw 'Wrong player id: ' + playerId;
 
 		var nocolumn = position.charCodeAt(0) - 'a'.charCodeAt(0);
 
-		if (nocolumn == NaN) throw 'Invalid position: ' + position;
+		if (nocolumn === NaN) throw 'Invalid position: ' + position;
 		if (nocolumn < 0 || nocolumn > 2)
 			throw 'Column index out of range: ' + nocolumn;
 
 		var norow = position.charCodeAt(1) - '1'.charCodeAt(0);
 
-		if (norow == NaN) throw 'Invalid position: ' + position;
+		if (norow === NaN) throw 'Invalid position: ' + position;
 		if (norow < 0 || norow > 2) throw 'Row index out of range: ' + norow;
 
 		if (room.board[3 * norow + nocolumn] != 0)
@@ -216,6 +242,7 @@ function updateGame(room, playerId, position) {
 module.exports.startNewGame = startNewGame;
 module.exports.startNewRound = startNewRound;
 module.exports.getUpdate = getUpdate;
+module.exports.getStatus = getStatus;
 module.exports.makeMove = makeMove;
 module.exports.updateGame = updateGame;
 module.exports.openRoom = openRoom;

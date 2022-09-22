@@ -146,6 +146,18 @@ function getUpdate(room, playerId) {
 }
 
 /**
+ * Function to return status of the room
+ * @param {Room} room
+ * @returns {{score: number[], state: State}}
+ */
+function getStatus(room) {
+	return {
+		score: room.score,
+		state: room.state,
+	};
+}
+
+/**
  * Function to check if last move score victory
  * @param {Room} room - Room instance
  * @returns {boolean} true if player won, false otherwise
@@ -340,7 +352,12 @@ function makeMove(room, playerId, move, dices) {
 		}
 		if (positions[1].type === 'f') {
 			if (enterFinish(room, positions)) {
-				if (room.throws > 0) {
+				if (checkIfWon(room)) {
+					customLog('Player ' + room.player + ' won!');
+					++room.score[room.player];
+					room.state.playerWon = room.player;
+					room.state.gameActive = false;
+				} else if (room.throws > 0) {
 					room.nextMove = 'throw';
 					room.rolled = undefined;
 				} else {
@@ -395,21 +412,16 @@ function makeMove(room, playerId, move, dices) {
  */
 function updateGame(room, playerId, position, dices) {
 	if (makeMove(room, playerId, position, dices)) {
-		if (checkIfWon(room)) {
-			customLog('Player ' + room.player + ' won!');
-			++room.score[room.player];
-			room.state.playerWon = room.player;
-			room.state.gameActive = false;
-		}
+		return true;
 	} else {
 		return false;
 	}
-	return true;
 }
 
 module.exports.startNewGame = startNewGame;
 module.exports.startNewRound = startNewRound;
 module.exports.getUpdate = getUpdate;
+module.exports.getStatus = getStatus;
 module.exports.makeMove = makeMove;
 module.exports.updateGame = updateGame;
 module.exports.openRoom = openRoom;
