@@ -16,6 +16,7 @@ const sessionParser = session({
 	saveUninitialized: false,
 	cookie: {
 		secure: false,
+		httpOnly: false,
 	},
 });
 
