@@ -14,6 +14,9 @@ const sessionParser = session({
 	secret: process.env.sessionSecret,
 	resave: false,
 	saveUninitialized: false,
+	cookie: {
+		secure: false,
+	},
 });
 
 var app = express();
