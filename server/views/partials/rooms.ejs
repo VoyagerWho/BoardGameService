@@ -65,8 +65,7 @@
     <form action="/rooms/open" method="post">
         <h2>Otwórz nowy pokój<br /></h2>
         <label for="name">Nazwa pokoju:</label>
-        <input type="text" name="name" title="Nazwa nowego pokoju" placeholder="Podaj nazwe dla pokoju"
-            value="2" /><br />
+        <input type="text" name="name" title="Nazwa nowego pokoju" placeholder="Podaj nazwe dla pokoju" /><br />
         <label for="gameId">Gra:</label>
         <select name="gameId" title="Gra w pokoju">
             <% locals.games.forEach((game, index)=> { %>

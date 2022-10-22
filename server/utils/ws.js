@@ -421,8 +421,8 @@ wsServer.on('connection', (socket, req) => {
 			if (!room.host) {
 				room.host = true;
 				req.session.rooms[rid].roomHost = true;
-				customLog(['Host connected', req.session.rooms]);
-			} else customLog('Host present');
+			} else if (req.session.rooms[rid].roomHost)
+				req.session.rooms[rid].roomHost = false;
 			req.session.save();
 		} else {
 			resjson.accepted = false;
@@ -457,9 +457,6 @@ wsServer.on('connection', (socket, req) => {
 			}
 			if (req.session.rooms[rid].roomHost) {
 				room.host = false;
-				//req.session.rooms[rid].roomHost = false;
-				req.session.save();
-				customLog(['Host disconnected', req.session.rooms]);
 			}
 			updateUsersList(room, 'Left');
 		});

@@ -1,22 +1,13 @@
 const express = require('express');
-const gameAPI = require('./api/game');
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
-const dbusersRouter = require('./routes/dbusers');
 const rooms = require('./routes/rooms');
 
 const sessionParser = session({
-	// store: MongoStore.create({
-	// 	mongoUrl: process.env.mongoApiKey,
-	// }),
 	secret: process.env.sessionSecret,
 	resave: false,
 	saveUninitialized: false,
-	cookie: {
-		secure: false,
-	},
 });
 
 var app = express();
@@ -58,7 +49,7 @@ app
 		}
 		if (
 			!typeof req.body.username === 'string' ||
-			!req.body.username.match(/^([^\s<>]+ )*[^\s<>]+$/)
+			!req.body.username.trim().match(/^([^\s<>]+ )*[^\s<>]+$/)
 		) {
 			res.render('index', {
 				middle: 'login',
