@@ -8,9 +8,9 @@ const dbusersRouter = require('./routes/dbusers');
 const rooms = require('./routes/rooms');
 
 const sessionParser = session({
-	store: MongoStore.create({
-		mongoUrl: process.env.mongoApiKey,
-	}),
+	// store: MongoStore.create({
+	// 	mongoUrl: process.env.mongoApiKey,
+	// }),
 	secret: process.env.sessionSecret,
 	resave: false,
 	saveUninitialized: false,

@@ -344,6 +344,7 @@ router.get('/:id/Observe', (req, res) => {
 	if (rooms.get(rid)) {
 		if (req.session.rooms === undefined) req.session.rooms = {};
 		req.session.rooms[rid] = { uid: 0 };
+		req.session.save();
 		res.redirect('/rooms/' + rid);
 	} else res.redirect('/rooms');
 });
@@ -353,6 +354,7 @@ router.get('/:id/Join', (req, res) => {
 	if (rooms.get(rid)) {
 		if (req.session.rooms === undefined) req.session.rooms = {};
 		req.session.rooms[rid] = { uid: -1 };
+		req.session.save();
 		res.redirect('/rooms/' + rid);
 	} else res.redirect('/rooms');
 });
