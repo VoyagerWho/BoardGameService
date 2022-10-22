@@ -457,7 +457,7 @@ wsServer.on('connection', (socket, req) => {
 			}
 			if (req.session.rooms[rid].roomHost) {
 				room.host = false;
-				req.session.rooms[rid].roomHost = false;
+				//req.session.rooms[rid].roomHost = false;
 				req.session.save();
 				customLog(['Host disconnected', req.session.rooms]);
 			}
