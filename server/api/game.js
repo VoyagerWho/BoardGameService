@@ -408,5 +408,4 @@ module.exports.close = close;
 module.exports.updateAll = updateAll;
 module.exports.processGameState = processGameState;
 module.exports.exampleOptions = exampleOptions;
-module.exports.validateGameAPI = validateGameAPI;
 module.exports.throwDices = throwDices;
