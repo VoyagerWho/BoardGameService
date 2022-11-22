@@ -46,145 +46,162 @@ function customLog(toLog) {
 //-----------------------------------------------------------------------------
 // Game engine API
 //-----------------------------------------------------------------------------
+/**
+ * @typedef RequestParameters
+ * @type {object}
+ * @property {boolean} valid
+ * @property {string} gameName
+ * @property {object} game
+ */
+
+/**
+ * First stage processing
+ * @param {Request} req
+ * @param {Response} res
+ * @return {RequestParameters}
+ */
+function processRequestBasic(req, res) {
+	const result = { valid: true };
+	result.gameName = req.params.GameName;
+	result.game = games[result.gameName];
+	if (!result.game) {
+		res.json({ accepted: false, message: "Game doesn't exist!" });
+		result.valid = false;
+	}
+	return result;
+}
+
+/**
+ * @typedef RequestParametersWithRoom
+ * @type {object}
+ * @property {boolean} valid
+ * @property {string} gameName
+ * @property {object} game
+ * @property {string} rid
+ * @property {string} roomName
+ * @property {object} room
+ */
+
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {RequestParametersWithRoom}
+ */
+function processRequestWithRoom(req, res) {
+	const result = processRequestBasic(req, res);
+	if (result.valid) {
+		result.rid = req.body.room;
+		if (result.rid) {
+			result.roomName = '#' + result.rid;
+			if (!rooms.get(result.roomName)) {
+				res.json({ accepted: true, message: "Room doesn't exist!" });
+				result.valid = false;
+				return result;
+			}
+			result.room = rooms.get(result.roomName);
+		}
+	}
+	return result;
+}
 
 app.get('/', (req, res) => {
 	res.sendFile('index.html', { root: __dirname });
 });
 
+app.get('/MDGABG', (req, res) => {
+	res.sendFile('MDGABG.png', { root: __dirname });
+});
+
 app.post('/:GameName/Open', (req, res) => {
-	const gameName = req.params.GameName;
-	const game = games[gameName];
-	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
+	const reqpar = processRequestBasic(req, res);
+	if (!reqpar.valid) return;
 	const rid = req.body.room;
-	const host = req.ip;
 	const roomName = '#' + rid;
 	console.log([roomName, req.body]);
 	if (!rooms.get(roomName)) {
-		rooms.set(roomName, game.openRoom());
+		rooms.set(roomName, reqpar.game.openRoom());
 		customLog(['Opened room', rooms]);
 		res.json({ accepted: true, message: 'New room opened' });
-	} else res.json({ accepted: false, message: 'Room exists!' });
+	} else res.json({ accepted: false, message: 'Room exist!' });
 });
 
 app.post('/:GameName/Close', (req, res) => {
-	const gameName = req.params.GameName;
-	const game = games[gameName];
-	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
-	const rid = req.body.room;
-	const host = req.ip;
-	const roomName = '#' + rid;
-	console.log([roomName, req.body]);
-	if (rooms.get(roomName)) {
-		rooms.delete(roomName);
-		customLog(['Closed room', rooms]);
-		res.json({ accepted: true, message: 'Room closed' });
-	} else res.json({ accepted: true, message: "Room doesn't exists!" });
+	const reqpar = processRequestWithRoom(req, res);
+	if (!reqpar.valid) return;
+	console.log([reqpar.roomName, req.body]);
+	rooms.delete(reqpar.roomName);
+	customLog(['Closed room', rooms]);
+	res.json({ accepted: true, message: 'Room closed' });
 });
 
 app.post('/:GameName/NewGame', (req, res) => {
-	const gameName = req.params.GameName;
-	const game = games[gameName];
-	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
-	const rid = req.body.room;
-	const host = req.ip;
-	const roomName = '#' + rid;
-	console.log([roomName, req.body]);
-	const room = rooms.get(roomName);
-	if (room) {
-		game.startNewGame(room, req.body.players);
-		res.json({ accepted: true, message: 'New game started!' });
-	} else res.json({ accepted: false, message: "Room doesn't exists!" });
+	const reqpar = processRequestWithRoom(req, res);
+	if (!reqpar.valid) return;
+	console.log([reqpar.roomName, req.body]);
+	reqpar.game.startNewGame(reqpar.room, req.body.players);
+	res.json({ accepted: true, message: 'New game started!' });
 });
 
 app.post('/:GameName/NewRound', (req, res) => {
-	const gameName = req.params.GameName;
-	const game = games[gameName];
-	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
-	const rid = req.body.room;
-	const host = req.ip;
-	const roomName = '#' + rid;
-	console.log([roomName, req.body]);
-	const room = rooms.get(roomName);
-	if (room) {
-		game.startNewRound(room);
-		res.json({ accepted: true, message: 'New round started!' });
-	} else res.json({ accepted: false, message: "Room doesn't exists!" });
+	const reqpar = processRequestWithRoom(req, res);
+	if (!reqpar.valid) return;
+	console.log([reqpar.roomName, req.body]);
+	reqpar.game.startNewRound(reqpar.room);
+	res.json({ accepted: true, message: 'New round started!' });
 });
 
 app.post('/:GameName/Move', (req, res) => {
-	const gameName = req.params.GameName;
-	const game = games[gameName];
-	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
-	const rid = req.body.room;
-	const host = req.ip;
-	const roomName = '#' + rid;
-	console.log([roomName, req.body]);
-	const room = rooms.get(roomName);
-	if (room) {
-		const pid = req.body.player;
-		const move = req.body.move;
-		if (move === 'throw') {
-			if (game.updateGame(room, pid, move, req.body.dices))
-				res.json({
-					accepted: true,
-					message: 'Throw accepted',
-					dices: req.body.dices,
-				});
-			else res.json({ accepted: false, message: 'Incorrect move data' });
-			return;
-		}
-		if (game.updateGame(room, pid, move))
-			res.json({ accepted: true, message: 'Move accepted' });
+	const reqpar = processRequestWithRoom(req, res);
+	if (!reqpar.valid) return;
+	console.log([reqpar.roomName, req.body]);
+	const pid = req.body.player;
+	const move = req.body.move;
+	if (move === 'throw') {
+		if (reqpar.game.updateGame(reqpar.room, pid, move, req.body.dices))
+			res.json({
+				accepted: true,
+				message: 'Throw accepted',
+			});
 		else res.json({ accepted: false, message: 'Incorrect move data' });
-	} else res.json({ accepted: false, message: "Room doesn't exists!" });
+		return;
+	}
+	if (reqpar.game.updateGame(reqpar.room, pid, move))
+		res.json({ accepted: true, message: 'Move accepted' });
+	else res.json({ accepted: false, message: 'Incorrect move data' });
 	console.log('Move handled');
 });
 
 app.post('/:GameName/Update', (req, res) => {
-	const gameName = req.params.GameName;
-	const game = games[gameName];
-	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
-	const rid = req.body.room;
-	const host = req.ip;
-	const roomName = '#' + rid;
-	console.log([roomName, req.body]);
-	const room = rooms.get(roomName);
-	if (room) {
-		const player = req.body.player;
-		const data = game.getUpdate(room, player);
-		if (Object.keys(data).length) {
-			customLog([
-				'response:',
-				{
-					...{ accepted: true, message: 'Request successful' },
-					...data,
-				},
-			]);
-			res.json({
+	const reqpar = processRequestWithRoom(req, res);
+	if (!reqpar.valid) return;
+	console.log([reqpar.roomName, req.body]);
+	const player = req.body.player;
+	const data = reqpar.game.getUpdate(reqpar.room, player);
+	if (Object.keys(data).length) {
+		customLog([
+			'response:',
+			{
 				...{ accepted: true, message: 'Request successful' },
 				...data,
-			});
-		} else res.json({ accepted: false, message: 'Request unsuccessful' });
-	} else res.json({ accepted: false, message: "Room doesn't exists!" });
+			},
+		]);
+		res.json({
+			...{ accepted: true, message: 'Request successful' },
+			...data,
+		});
+	} else res.json({ accepted: false, message: 'Request unsuccessful' });
 });
 
 app.post('/:GameName/Status', (req, res) => {
-	const gameName = req.params.GameName;
-	const game = games[gameName];
-	if (!game) res.json({ accepted: false, message: "Game doesn't exists!" });
-	const rid = req.body.room;
-	if (rid) {
-		const host = req.ip;
-		const roomName = '#' + rid;
-		console.log([roomName, req.body]);
-		const room = rooms.get(roomName);
-		if (room) {
-			const data = game.getStatus(room);
-			res.json({
-				...{ accepted: true, message: 'Room active' },
-				...data,
-			});
-		} else res.json({ accepted: true, message: "Room doesn't exists!" });
+	const reqpar = processRequestWithRoom(req, res);
+	if (!reqpar.valid) return;
+	console.log([reqpar.roomName, req.body]);
+	if (reqpar.rid) {
+		const data = reqpar.game.getStatus(reqpar.room);
+		res.json({
+			...{ accepted: true, message: 'Room active' },
+			...data,
+		});
 	}
 	res.json({ accepted: true, message: 'Server online!' });
 });
@@ -214,11 +231,9 @@ const description = {
 				'/static/images/textures/Tile1.png',
 				'/static/images/textures/Tile1sp1.png',
 				'/static/images/textures/Tile1sp2.png',
-				'/static/images/textures/Tile1sp3.png',
-				'/static/images/textures/Tile1sp4.png',
 			],
 		},
-		api: {
+		functions: {
 			API: '/TicTacToe/api',
 			NewGame: '/TicTacToe/NewGame',
 			NewRound: '/TicTacToe/NewRound',
@@ -252,7 +267,7 @@ const description = {
 				'/static/images/textures/Tile1sp4.png',
 			],
 		},
-		api: {
+		functions: {
 			API: '/ConnectFour/api',
 			NewGame: '/ConnectFour/NewGame',
 			NewRound: '/ConnectFour/NewRound',
@@ -278,28 +293,14 @@ const description = {
 				width: 736,
 				height: 736,
 				background: {
-					image:
-						'https://i.pinimg.com/736x/0e/10/b5/0e10b5dee4f4d73f7facac1fac79a9c9.jpg',
+					image: 'https://' + hostname + '/MDGABG',
 				},
 				textures: [
-					'/static/images/textures/Tile1.png',
-					'/static/images/textures/Tile1p1.png',
-					'/static/images/textures/Tile1p2.png',
-					'/static/images/textures/Tile1p3.png',
-					'/static/images/textures/Tile1p4.png',
-					'/static/images/textures/Tile1s.png',
-					'/static/images/textures/Tile1sp1.png',
-					'/static/images/textures/Tile1sp2.png',
-					'/static/images/textures/Tile1sp3.png',
-					'/static/images/textures/Tile1sp4.png',
-					'/static/images/textures/TileB.png',
-					'/static/images/textures/TileBp.png',
-					'/static/images/textures/TileG.png',
-					'/static/images/textures/TileGp.png',
-					'/static/images/textures/TileR.png',
-					'/static/images/textures/TileRp.png',
-					'/static/images/textures/TileY.png',
-					'/static/images/textures/TileYp.png',
+					'/static/images/textures/TileEmpty.png',
+					'/static/images/textures/TileP1.png',
+					'/static/images/textures/TileP2.png',
+					'/static/images/textures/TileP3.png',
+					'/static/images/textures/TileP4.png',
 				],
 				tiles: [
 					{ x: 16, y: 272, name: 's0' },
@@ -384,7 +385,7 @@ const description = {
 				rotations: 10,
 			},
 		],
-		api: {
+		functions: {
 			API: '/ManDontGetAngry/api',
 			NewGame: '/ManDontGetAngry/NewGame',
 			NewRound: '/ManDontGetAngry/NewRound',
@@ -395,8 +396,8 @@ const description = {
 			Close: '/ManDontGetAngry/Close',
 		},
 	},
-	Statki: {
-		name: 'Statki',
+	BattleShips: {
+		name: 'BattleShips',
 		hostname: hostname,
 		port: 443,
 		description: 'Dwuosobowa gra w statki',
@@ -438,7 +439,7 @@ const description = {
 				],
 			},
 		],
-		api: {
+		functions: {
 			API: '/Statki/api',
 			NewGame: '/Statki/NewGame',
 			NewRound: '/Statki/NewRound',
@@ -451,22 +452,15 @@ const description = {
 	},
 };
 
-app
-	.route('/:GameName/api')
-	.get((req, res) => {
-		if (!description[req.params.GameName]) {
-			res.json({ accepted: false, message: 'Gra nie istnieje!' });
-			return;
-		}
-		res.json({ accepted: true, api: description[req.params.GameName] });
-	})
-	.post((req, res) => {
-		if (!description[req.params.GameName]) {
-			res.json({ accepted: false, message: 'Gra nie istnieje!' });
-			return;
-		}
-		res.json({ accepted: true, api: description[req.params.GameName] });
-	});
+function processApiRequest(req, res) {
+	if (!description[req.params.GameName]) {
+		res.json({ accepted: false, message: "Game doesn't exist!" });
+		return;
+	}
+	res.json({ accepted: true, api: description[req.params.GameName] });
+}
+
+app.route('/:GameName/api').get(processApiRequest).post(processApiRequest);
 
 app.use((err, req, res, next) => {
 	// format error

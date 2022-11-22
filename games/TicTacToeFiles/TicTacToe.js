@@ -103,11 +103,7 @@ function startNewRound(room) {
  */
 function getUpdate(room, playerId) {
 	return {
-		boards: [
-			room.board,
-			[0, 1, 2, 0, 2, 1, 1, 2, 0],
-			[0, 1, 0, 2, 0, 2, 0, 1, 0],
-		],
+		board: room.board,
 		score: room.score,
 		state: room.state,
 		nextMove: 'choice',

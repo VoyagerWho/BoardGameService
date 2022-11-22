@@ -235,7 +235,7 @@ components:
                   - $ref: '#/components/schemas/simpleBoard'
                   - $ref: '#/components/schemas/customBoard'
                   - $ref: '#/components/schemas/randomBoard'
-            api:
+            functions:
               type: object
               properties:
                 API:
@@ -269,7 +269,7 @@ components:
             - port
             - description
             - maxNoPlayers
-            - api
+            - functions
       required:
         - accepted
         - api
@@ -307,25 +307,6 @@ components:
         - player
         - move
         - board
-    MoveResponse:
-      type: object
-      properties:
-        accepted:
-          type: boolean
-        message:
-          type: string
-        dices:
-          type: array
-          items:
-            type: array
-            items:
-              type: integer
-              minimum: 1
-            minItems: 2
-          minItems: 1
-      required:
-        - accepted
-        - message
     Update:
       type: object
       properties:
@@ -461,12 +442,6 @@ components:
             anyOf:
               - $ref: '#/components/schemas/GameState'
               - $ref: '#/components/schemas/PlainResponse'
-    Move:
-      description: Response for valid move
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MoveResponse'
     Status:
       description: Room status.
       content:
@@ -485,6 +460,15 @@ paths:
           description: Success
           content:
             text/html: {}
+  /MDGABG:
+    get:
+      summary: Background for MDGA
+      description: Background image for Man Don't Get Angry
+      responses:
+        '200':
+          description: Success
+          content:
+            image/png: {}
   /{GameName}/api:
     parameters:
       - $ref: '#/components/parameters/GameName'
@@ -574,7 +558,7 @@ paths:
         $ref: '#/components/requestBodies/Move'
       responses:
         '200':
-          $ref: '#/components/responses/Move'
+          $ref: '#/components/responses/Plain'
   /{GameName}/Update:
     parameters:
       - $ref: '#/components/parameters/GameName'
