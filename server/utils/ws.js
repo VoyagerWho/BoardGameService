@@ -45,6 +45,7 @@ function customLog(toLog) {
 	console.log('WS:');
 	console.log(toLog);
 }
+
 //---------------------------------------------------------------------
 const wsServer = new ws.Server({ noServer: true });
 module.exports.wsServer = wsServer;
@@ -54,7 +55,7 @@ module.exports.wsServer = wsServer;
  * @param {String} rid - ID of room instance
  * @param {JSON} room - room instance to update
  */
-function updateUsersList(room, mode) {
+function updateUsersList(rid, room, mode) {
 	room.players.forEach((player, index) => {
 		if (player) {
 			ejs
@@ -63,6 +64,7 @@ function updateUsersList(room, mode) {
 					{
 						room: room,
 						uid: index,
+						rid,
 					}
 				)
 				.then((value) => {
@@ -76,6 +78,7 @@ function updateUsersList(room, mode) {
 				});
 		}
 	});
+
 	room.observers.forEach((observer, index) => {
 		if (observer) {
 			ejs
@@ -85,6 +88,7 @@ function updateUsersList(room, mode) {
 						room: room,
 						uid: 0,
 						oid: index,
+						rid,
 					}
 				)
 				.then((value) => {
@@ -107,7 +111,6 @@ function updateUsersList(room, mode) {
  * @param {{action: string, move: string, roles: string[] }} messjson
  */
 function handleMessage(socket, req, messjson) {
-	var roomStats = {};
 	var resjson = { action: messjson.action };
 	const rid = req.url.substring(7);
 	const room = rooms.get(rid);
@@ -191,7 +194,7 @@ function handleMessage(socket, req, messjson) {
 							if (element) ++id;
 						});
 						room.noObservers = id;
-						updateUsersList(room);
+						updateUsersList(rid, room);
 					}
 					gameAPI.startNewGame(
 						room.game,
@@ -296,7 +299,9 @@ function handleMessage(socket, req, messjson) {
 									return;
 								}
 								resjson.accepted = data.accepted;
-								resjson.message = data.message;
+								resjson.message = data.accepted
+									? 'Ruch zaakceptowany'
+									: 'Ruch odrzucony';
 								customLog(resjson);
 								socket.send(JSON.stringify(resjson));
 							});
@@ -344,6 +349,34 @@ function handleMessage(socket, req, messjson) {
 		case 'Ping':
 			{
 				socket.send(JSON.stringify({ action: 'Pong', accepted: true }));
+			}
+			break;
+		case 'List':
+			{
+				if (req.session.rooms[rid].roomHost) {
+					ejs
+						.renderFile(
+							path.join(
+								views,
+								'partials',
+								'gamesparts',
+								'misc',
+								'usersRoomHost.ejs'
+							),
+							{
+								room: room,
+							}
+						)
+						.then((list) =>
+							socket.send(
+								JSON.stringify({
+									action: 'List',
+									accepted: true,
+									list: list,
+								})
+							)
+						);
+				}
 			}
 			break;
 		default:
@@ -421,8 +454,24 @@ wsServer.on('connection', (socket, req) => {
 			if (!room.host) {
 				room.host = true;
 				req.session.rooms[rid].roomHost = true;
-			} else if (req.session.rooms[rid].roomHost)
-				req.session.rooms[rid].roomHost = false;
+				ejs
+					.renderFile(
+						path.join(views, 'partials', 'gamesparts', 'misc', 'roomHost.ejs'),
+						{
+							game: game,
+							room: room,
+						}
+					)
+					.then((list) => {
+						socket.send(
+							JSON.stringify({
+								action: 'RoomHost',
+								accepted: true,
+								roomHost: list,
+							})
+						);
+					});
+			}
 			req.session.save();
 		} else {
 			resjson.accepted = false;
@@ -432,7 +481,7 @@ wsServer.on('connection', (socket, req) => {
 
 		console.log('Role assigned');
 		socket.send(JSON.stringify(resjson));
-		updateUsersList(room);
+		updateUsersList(rid, room);
 		socket.on('message', (message) => {
 			var messjson = {};
 			try {
@@ -457,8 +506,10 @@ wsServer.on('connection', (socket, req) => {
 			}
 			if (req.session.rooms[rid].roomHost) {
 				room.host = false;
+				req.session.rooms[rid].roomHost = false;
+				req.session.save();
 			}
-			updateUsersList(room, 'Left');
+			updateUsersList(rid, room, 'Left');
 		});
 	});
 });

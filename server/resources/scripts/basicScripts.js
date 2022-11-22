@@ -57,7 +57,24 @@ function checkGame(form) {
 		if (resjson.accepted) {
 			document.getElementById('gameResponse').style.color = 'limegreen';
 		} else {
-			document.getElementById('gameResponse').style.color = 'red';
+			document.getElementById('gameResponse').style.color = 'yellow';
+		}
+	});
+}
+
+/**
+ * Function to send game api validation request
+ * @param {html.form} form
+ */
+function checkStatus(form, name) {
+	xmlhttpPost('/games/check/' + name, {}, function (response) {
+		var resjson = JSON.parse(response);
+		console.log(resjson);
+		form.getElementsByTagName('div')[0].innerHTML = resjson.message;
+		if (resjson.accepted) {
+			form.getElementsByTagName('div')[0].style.color = 'limegreen';
+		} else {
+			form.getElementsByTagName('div')[0].style.color = 'yellow';
 		}
 	});
 }

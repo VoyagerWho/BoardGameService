@@ -44,29 +44,10 @@
     margin: 10px auto 10px;
     display: inline-block;
 }
-
-.diceSpace > button {
-    display: inline-block;
+.diceSpace button {
     font-size: 2.5rem;
-    text-align: right;
     margin-left: 64px;
-    background-color: #404040;
-    border: 1px solid black;
-    color: #c0c0c0;
-    padding: 8px;
-    box-shadow: 4px 4px 4px #606060 inset, -4px -4px 4px #606060 inset;
-    transition-duration: 0.5s;
 }
-
-.diceSpace>button:active {
-    background-color: #20e20e;
-    box-shadow: 4px 4px 4px #404040 inset, -4px -4px 4px #404040 inset;
-}
-
-.diceSpace>button:hover {
-    border: 1px solid peru;
-}
-
 .dice {
     width: 64px;
     height: 64px;

@@ -20,6 +20,9 @@
                                         Gracz<%= index %>
                                             <%= locals.uid===index ? '(Ty)' : '' %>
                                                 <% } %>
+                                                    <% if (element.session.rooms[rid].roomHost) { %>
+                                                        [Gospodarz]
+                                                        <% } %>
                         </li>
                         <% } %>
                             <% }) %>
@@ -36,6 +39,9 @@
                                         Obserwator<%= index+1 %>
                                             <%= locals.oid===index ? '(Ty)' : '' %>
                                                 <% } %>
+                                                    <% if (element.session.rooms[rid].roomHost) { %>
+                                                        [Gospodarz]
+                                                        <% } %>
                         </li>
                         <% } %>
                             <% }) %>

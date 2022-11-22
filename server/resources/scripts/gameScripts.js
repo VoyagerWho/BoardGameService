@@ -14,6 +14,9 @@ socket.onopen = function (e) {
 socket.onmessage = function (event) {
 	var resjson = JSON.parse(event.data.toString());
 	console.log(resjson);
+	if (resjson.action === 'Move') {
+		alert(resjson.message);
+	}
 	if (resjson.accepted) {
 		switch (resjson.action) {
 			case 'GetRole':
@@ -31,11 +34,23 @@ socket.onmessage = function (event) {
 			case 'Left':
 				{
 					document.getElementById('playersList').outerHTML = resjson.message;
+					downloadList();
 				}
 				break;
 			case 'Throw':
 				{
 					window['rollDices' + resjson.board](resjson.dices);
+				}
+				break;
+			case 'List':
+				{
+					updateList(resjson.list);
+				}
+				break;
+			case 'RoomHost':
+				{
+					eval(resjson.scripts);
+					document.getElementById('roomHost').innerHTML = resjson.roomHost;
 				}
 				break;
 

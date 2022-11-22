@@ -132,3 +132,30 @@ footer{
 	color: yellow;
 	font-weight: bold;
 }
+
+button, input, select {
+	background-color: #404040;
+	border: 1px solid black;
+	color: #c0c0c0;
+}
+
+button, input[type=button], input[type=submit] {
+	display: inline-block;
+	text-align: center;
+	padding: 8px;
+	box-shadow: 4px 4px 4px #606060 inset, -4px -4px 4px #606060 inset;
+	transition-duration: 0.5s;
+}
+
+button:active,
+input[type=button]:active,
+input[type=submit]:active {
+	background-color: #20e20e;
+	box-shadow: 4px 4px 4px #404040 inset, -4px -4px 4px #404040 inset;
+}
+
+button:hover,
+input[type=button]:hover,
+input[type=submit]:hover {
+	border: 1px solid peru;
+}

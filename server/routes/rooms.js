@@ -275,45 +275,27 @@ router.get('/games/check/:id', (req, res) => {
 						resjson = JSON.parse(d.toString());
 					} catch (error) {
 						customLog(['Received Error:', d.toString()]);
-						res.render('index', {
-							middle: 'games',
-							games: games,
-							text: 'Nie prawidłowa odpowiedź',
-						});
+						res.json({ accepted: false, message: 'Nie prawidłowa odpowiedź' });
 						return;
 					}
 
 					customLog(['Received', resjson]);
 					if (resjson.accepted) {
-						res.render('index', {
-							middle: 'games',
-							games: games,
-							text: 'Gra działa poprawnie',
-						});
+						res.json({ accepted: true, message: 'Gra działa poprawnie' });
 						return;
 					}
-					res.render('index', {
-						middle: 'games',
-						games: games,
-						text: 'Wystąpił błąd',
-					});
+					res.json({ accepted: false, message: 'Wystąpił błąd' });
 				});
 			},
 			(err) => {
 				customLog(err);
-				res.render('index', {
-					middle: 'games',
-					games: games,
-					text: 'Wystąpił problem z połączeniem',
+				res.json({
+					accepted: false,
+					message: 'Wystąpił problem z połączeniem',
 				});
 			}
 		);
-	} else
-		res.render('index', {
-			middle: 'games',
-			games: games,
-			text: 'Podana gra nie istnieje',
-		});
+	} else res.json({ accepted: false, message: 'Podana gra nie istnieje' });
 });
 
 router.get('/:id', (req, res) => {
@@ -329,6 +311,7 @@ router.get('/:id', (req, res) => {
 			middle: 'gameSpace',
 			game: game,
 			room: room,
+			rid: rid,
 			uid: req.session.rooms[rid].uid,
 			oid:
 				req.session.rooms[rid].uid == 0

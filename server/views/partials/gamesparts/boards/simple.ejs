@@ -12,7 +12,7 @@
                 <%='tiles' + locals.index %> [index].onload = () => {
                     resolve();
                 };
-
+                <%='tiles' + locals.index %> [index].crossOrigin = 'Anonymous';
                 <%='tiles' + locals.index %> [index].src = imageUrl;
             }));
         });

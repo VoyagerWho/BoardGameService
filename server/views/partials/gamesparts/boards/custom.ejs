@@ -4,12 +4,7 @@
 <script>
     const <%= 'tiles' + locals.index %> =[];
     const <%= 'layout' + locals.index %> = JSON.parse(document.getElementById('board:<%= locals.index %>').getElementsByClassName('layout')[0].innerText);
-    if (<%= 'layout' + locals.index %>.background.image) {
-        let background = {};
-    }
-    if (<%= 'layout' + locals.index %>.background.color) {
-        document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.backgroundColor = <%= 'layout' + locals.index %>.background.color;
-    }
+
     async function loadImages<%= locals.index %> () {
         const promiseArray = [];
         <%= 'layout' + locals.index %>.textures.forEach((imageUrl, index) => {
@@ -18,7 +13,7 @@
                 <%='tiles' + locals.index %> [index].onload = () => {
                     resolve();
                 };
-
+                //<%='tiles' + locals.index %> [index].crossOrigin = 'Anonymous';
                 <%='tiles' + locals.index %> [index].src = imageUrl;
             }));
         });
@@ -28,6 +23,7 @@
                 background.onload = () => {
                     resolve();
                 };
+                //background.crossOrigin = 'Anonymous';
                 background.src = <%= 'layout' + locals.index %>.background.image;
             }));
         }
@@ -57,54 +53,60 @@
 <% if (locals.uid !==0) { %>
     <script>
         setupFunctions.push(() => {
-            checkClick = (pos) => {
-                const tileH = <%=  locals.board.tileHeight %>;
-                const tileW = <%=  locals.board.tileWidth %>;
-                var clicked = '';
-                try {
+            if (<%= 'layout' + locals.index %>.background.image) {
+            let background = {};
+        }
+        if (<%= 'layout' + locals.index %>.background.color) {
+            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.backgroundColor = <%= 'layout' + locals.index %>.background.color;
+        }
+        checkClick = (pos) => {
+            const tileH = <%=  locals.board.tileHeight %>;
+            const tileW = <%=  locals.board.tileWidth %>;
+            var clicked = '';
+            try {
                     <%= 'layout' + locals.index %>.tiles.forEach((tile) => {
-                    if (
-                        pos.x >= tile.x &&
-                        pos.x <= tile.x + tileW &&
-                        pos.y >= tile.y &&
-                        pos.y <= tile.y + tileH
-                    ) {
-                        clicked = tile.name;
-                        throw Error('Found tile')
-                    }
+                if (
+                    pos.x >= tile.x &&
+                    pos.x <= tile.x + tileW &&
+                    pos.y >= tile.y &&
+                    pos.y <= tile.y + tileH
+                ) {
+                    clicked = tile.name;
+                    throw Error('Found tile')
+                }
 
-                });
-                } catch (error) {
-                    if (error.message !== 'Found tile') {
-                        throw error;
+            });
+            } catch (error) {
+                if (error.message !== 'Found tile') {
+                    throw error;
+                }
+
+            }
+
+            return clicked;
+        }
+        document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].onclick = (e) => {
+                <% if (locals.uid !== 0) { %>
+                    if (nextMove === 'choice') {
+                    makeMove(checkClick({ x: e.offsetX, y: e.offsetY }), <%= locals.index %>);
+                }
+                else if (nextMove === 'move') {
+                    const currentClick = checkClick({ x: e.offsetX, y: e.offsetY });
+                    if (lastClick === '') {
+                        lastClick = currentClick;
+                        document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid limegreen';
+                    }
+                    else if (lastClick === currentClick) {
+                        lastClick = '';
+                        document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid #a0a0a0';
+                    }
+                    else {
+                        makeMove(lastClick + '|' + checkClick({ x: e.offsetX, y: e.offsetY }), <%= locals.index %>);
+                        lastClick = '';
+                        document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid #a0a0a0';
                     }
 
                 }
-
-                return clicked;
-            }
-            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].onclick = (e) => {
-                <% if (locals.uid !== 0) { %>
-                    if (nextMove === 'choice') {
-                        makeMove(checkClick({ x: e.offsetX, y: e.offsetY }), <%= locals.index %>);
-                    }
-                    else if (nextMove === 'move') {
-                        const currentClick = checkClick({ x: e.offsetX, y: e.offsetY });
-                        if (lastClick === '') {
-                            lastClick = currentClick;
-                            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid limegreen';
-                        }
-                        else if (lastClick === currentClick) {
-                            lastClick = '';
-                            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid #a0a0a0';
-                        }
-                        else {
-                            makeMove(lastClick + '|' + checkClick({ x: e.offsetX, y: e.offsetY }), <%= locals.index %>);
-                            lastClick = '';
-                            document.getElementById('board:<%= locals.index %>').getElementsByClassName('canvas')[0].style.border = '2px solid #a0a0a0';
-                        }
-
-                    }
                 <% } %>
             };
         });

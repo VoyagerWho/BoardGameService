@@ -1,60 +1,14 @@
-<script>
-    function updateList() {
-        const div = document.getElementById("usersRoles");
-        div.hidden = !div.hidden;
-    }
-    function startNewGame(form) {
-        const roles = [];
-        const nop = <%= locals.game.maxNoPlayers%>;
-        for (var i = 1; i <= nop; ++i) {
-            roles.push(document.getElementById(`player#${i}`).value);
-        }
-        socket.send(JSON.stringify({ action: 'NewGame', roles: roles }));
-    }
-    function startNewRound() {
-        socket.send(JSON.stringify({ action: 'NewRound' }));
-    }
-    function updateOption(option) {
-        const id = new Number(option.id.split('#')[1]);
-        const nop = <%= locals.game.maxNoPlayers %>;
-        if (id < nop) {
-            if (!option.value) {
-                for (var i = id + 1; i <= nop; ++i) {
-                    const opt = document.getElementById(`player#${i}`);
-                    opt.value = "";
-                    opt.disabled = true;
-                }
-            }
-            else document.getElementById(`player#${id + 1}`).disabled = false;
-        }
-
-    }
-</script>
-<div id="roomHost">
-    <form>
-        <input type="button" id="btnGame" class="bottonBox" value="Nowa Gra" onclick="startNewGame(this.form)" />
-        <input type="button" id="btnRound" class="bottonBox" value="Nowa Runda" onclick="startNewRound()" />
-        <input type="button" class="buttonBox" value=". . ." onclick="updateList()" />
-        <div id="usersRoles" class="hideable" hidden>
-            <% for( var i=1; i <=locals.game.maxNoPlayers; ++i ) { %>
-                <label for="player#<%= i %>">Gracz <%= i %>:</label>
-                <select id="player#<%= i %>" name="player#<%= i %>" onchange="updateOption(this)" <%=i===1?''
-                    : 'disabled' %> >
-                    <option value="">None</option>
-                    <% locals.room.players.forEach((element, index )=> {
-                        if(element) {%>
-                        <option value="<%= `u${index}` %>">
-                            <%= element.username || `Gracz${index}` %>
-                        </option>
-                        <% }}) %>
-                            <% locals.room.observers.forEach((element, index )=> {
-                                if(element) {%>
-                                <option value="<%= `o${index}` %>">
-                                    <%= element.username || `Obserwator${index+1}` %>
-                                </option>
-                                <% }}) %>
-                </select><br />
-                <% } %>
-        </div>
-    </form>
-</div>
+<form>
+    <input type="button" id="btnGame" class="bottonBox" value="Nowa Gra" onclick="startNewGame(this.form)" />
+    <input type="button" id="btnRound" class="bottonBox" value="Nowa Runda" onclick="startNewRound()" />
+    <input type="button" class="buttonBox" value=". . ." onclick="updateListVisibility()" />
+    <div id="usersRoles" class="hideable" hidden>
+        <% for( var i=1; i <=locals.game.maxNoPlayers; ++i ) { %>
+            <label for="player#<%= i %>">Gracz <%= i %>:</label>
+            <select id="player#<%= i %>" name="player#<%= i %>" onchange="updateOption(this)" <%=i===1?'' : 'disabled'
+                %> >
+                <%- include('./usersRoomHost.ejs') %>
+            </select><br />
+            <% } %>
+    </div>
+</form>

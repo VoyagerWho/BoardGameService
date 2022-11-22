@@ -1,0 +1,13 @@
+<option value="">None</option>
+<% locals.room.players.forEach((element, index )=> {
+    if(element) {%>
+    <option value="<%= `u${index}` %>">
+        <%= element.username || `Gracz${index}` %>
+    </option>
+    <% }}) %>
+        <% locals.room.observers.forEach((element, index )=> {
+            if(element) {%>
+            <option value="<%= `o${index}` %>">
+                <%= element.username || `Obserwator${index+1}` %>
+            </option>
+            <% }}) %>

@@ -1,60 +1,98 @@
 <header>
     <h1 id="gameStatus">Unknown</h1>
     <h3 id="playerRound"></h3>
+    <button type="button" id="Refresh">Odświerz</button>
 </header>
-<% if (locals.roomHost) { %>
-    <%- include("./gamesparts/misc/roomHost.ejs") %>
-        <% } %>
+<div id="roomHost">
+    <script>
+        function updateListVisibility() {
+            const div = document.getElementById('usersRoles');
+            div.hidden = !div.hidden;
+        }
+        function downloadList() {
+            socket.send(JSON.stringify({ action: 'List' }));
+        }
+        function updateList(newList) {
+            const arr = document.getElementById('usersRoles').getElementsByTagName('select');
+            for (var i = 0; i < arr.length; ++i) { arr[i].innerHTML = newList; };
+        } function startNewGame(form) {
+            const roles = [];
+            const nop =<%=locals.game.maxNoPlayers%>;
+            for (var i = 1; i <= nop; ++i) { roles.push(document.getElementById(`player#${i}`).value); }
+            socket.send(JSON.stringify({ action: 'NewGame', roles: roles }));
+        } function startNewRound() {
+            socket.send(JSON.stringify({ action: 'NewRound' }));
+        } function updateOption(option) {
+            const id = new
+                Number(option.id.split('#')[1]); const nop =<%=locals.game.maxNoPlayers %>;
+            if (id < nop) {
+                if (!option.value) {
+                    for (var i = id + 1; i <= nop; ++i) {
+                        const
+                            opt = document.getElementById(`player#${i}`); opt.value = ''; opt.disabled = true;
+                    }
+                } else
+                    document.getElementById(`player#${id + 1}`).disabled = false;
+            }
+        }
+    </script>
+    <% if (locals.roomHost) { %>
+        <%- include("./gamesparts/misc/roomHost.ejs") %>
+            <% } %>
+</div>
 
-            <script>
-                const updateFunctions = [];
-                const setupFunctions = [];
-                var lastClick = '';
-                var nextMove = '';
-                function updateGUI(state) {
-                    document.getElementById('gameStatus').innerHTML = state.gameActiveDesc;
-                    document.getElementById('playerRound').innerHTML = state.nextPlayerDesc;
-                    nextMove = state.nextMove;
+<script>
+    const updateFunctions = [];
+    const setupFunctions = [];
+    var lastClick = '';
+    var nextMove = '';
+    function updateGUI(state) {
+        document.getElementById('gameStatus').innerHTML = state.gameActiveDesc;
+        document.getElementById('playerRound').innerHTML = state.nextPlayerDesc;
+        nextMove = state.nextMove;
 
-                    updateFunctions.forEach(fun => {
-                        try {
-                            fun(state);
-                        } catch (error) {
-                            console.log(error);
-                        }
+        updateFunctions.forEach(fun => {
+            try {
+                fun(state);
+            } catch (error) {
+                console.log(error);
+            }
 
-                    });
+        });
 
-                    const scoreboard = document.getElementById('scores');
-                    for (var i = 0; i < scoreboard.children.length; ++i)
-                        scoreboard.children[i].innerHTML = state.score[i].toString();
-                }
+        const scoreboard = document.getElementById('scores');
+        for (var i = 0; i < scoreboard.children.length; ++i)
+            scoreboard.children[i].innerHTML = state.score[i].toString();
+    }
 
-                function setup() {
-                    setupFunctions.forEach(fun => {
-                        try {
-                            fun();
-                        } catch (error) {
-                            console.log(error);
-                        }
-                    });
-                    console.log('Setup finished!');
-                }
-            </script>
-            <% if (locals.game.board) { %>
-                <div id="board:0" class="gameBoard">
-                    <% locals.board=locals.game.board; locals.index=0;%>
-                        <%- include("./gamesparts/boards/"+locals.board.type+".ejs") %>
-                </div>
-                <% } else if (locals.game.boards) { %>
-                    <% locals.game.boards.forEach((element, index)=> { %>
-                        <div id="board:<%= index %>" class="gameBoard">
-                            <% locals.board=element; locals.index=index;%>
-                                <%- include("./gamesparts/boards/"+locals.board.type+".ejs") %>
-                        </div>
-                        <% }) %>
-                            <% } %>
-                                <%- include('./gamesparts/misc/score.ejs') %>
-                                    <footer id="gameFooter">
-                                        <%= locals.game.description%>
-                                    </footer>
+    function setup() {
+        setupFunctions.forEach(fun => {
+            try {
+                fun();
+            } catch (error) {
+                console.log(error);
+            }
+        });
+        console.log('Setup finished!');
+    }
+    document.getElementById('Refresh').onclick = e => {
+        update();
+    };
+</script>
+<% if (locals.game.board) { %>
+    <div id="board:0" class="gameBoard">
+        <% locals.board=locals.game.board; locals.index=0;%>
+            <%- include("./gamesparts/boards/"+locals.board.type+".ejs") %>
+    </div>
+    <% } else if (locals.game.boards) { %>
+        <% locals.game.boards.forEach((element, index)=> { %>
+            <div id="board:<%= index %>" class="gameBoard">
+                <% locals.board=element; locals.index=index;%>
+                    <%- include("./gamesparts/boards/"+locals.board.type+".ejs") %>
+            </div>
+            <% }) %>
+                <% } %>
+                    <%- include('./gamesparts/misc/score.ejs') %>
+                        <footer id="gameFooter">
+                            <%= locals.game.description%>
+                        </footer>

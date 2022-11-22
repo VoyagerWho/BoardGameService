@@ -151,10 +151,10 @@ function genRandom(dices, sides, rotations) {
 /**
  * @typedef DiceSimulatorDescription
  * @type {object}
- * @property {boolean} desc.real - wheter to use real 6 faced dice or arbitrary one
- * @property {number} [desc.numberOfSides=6] - how many sides a single dice have (ommited if real = true)
- * @property {number} desc.numberOfDices - how many dices are used at once
- * @property {number} [desc.rotations=1] - number of rolls of single dice (useful for animations)
+ * @property {boolean} real - wheter to use real 6 faced dice or arbitrary one
+ * @property {number} [numberOfSides=6] - how many sides a single dice have (ommited if real = true)
+ * @property {number} numberOfDices - how many dices are used at once
+ * @property {number} [rotations=1] - number of rolls of single dice (useful for animations)
  */
 
 /**
@@ -241,6 +241,7 @@ function getHttpsOptionsForGame(game) {
 			'Content-Type': 'application/json',
 			'Content-Length': 0,
 		},
+		timeout: 3000,
 	};
 	options.hostname = game.hostname;
 	options.port = game.port;
@@ -319,7 +320,7 @@ const close = (game, data, responseHandler, errorHandler) =>
 
 function sendCommand(command, game, data, responseHandler, errorHandler) {
 	var options = getHttpsOptionsForGame(game);
-	options.path = game.api[command];
+	options.path = game.functions[command];
 	if (data && Object.keys(data).length) {
 		console.log({ command, data });
 		data = JSON.stringify(data);
@@ -335,7 +336,7 @@ function sendCommand(command, game, data, responseHandler, errorHandler) {
  */
 function updateAll(rid, room) {
 	var options = getHttpsOptionsForGame(room.game);
-	options.path = room.game.api['Update'];
+	options.path = room.game.functions['Update'];
 	room.players.forEach((player, index) => {
 		if (player) {
 			var data = JSON.stringify({ room: rid, player: index });
@@ -407,4 +408,5 @@ module.exports.close = close;
 module.exports.updateAll = updateAll;
 module.exports.processGameState = processGameState;
 module.exports.exampleOptions = exampleOptions;
+module.exports.validateGameAPI = validateGameAPI;
 module.exports.throwDices = throwDices;
