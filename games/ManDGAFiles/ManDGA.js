@@ -127,15 +127,6 @@ function startNewRound(room) {
  */
 function getUpdate(room, playerId) {
 	const board = room.board.concat(room.bases).concat(room.finishes);
-	saveZones.concat(startZones).forEach((zoneId) => {
-		board[zoneId] += 5;
-	});
-	for (var pid = 0; pid < 4; ++pid) {
-		for (var zid = 0; zid < 4; ++zid) {
-			board[4 * pid + zid + 40 + 16] =
-				10 + 2 * pid + (board[4 * pid + zid + 40 + 16] > 0 ? 1 : 0);
-		}
-	}
 	return {
 		board: board,
 		score: room.score,
