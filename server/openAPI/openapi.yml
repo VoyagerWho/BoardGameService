@@ -473,16 +473,16 @@ paths:
     parameters:
       - $ref: '#/components/parameters/GameName'
     get:
-      summary: Get the API describtion of the game
+      summary: Get the API description of the game
       description: |
-        Retrieves the API describtion of the game
+        Retrieves the API description of the game
       responses:
         '200':
           $ref: '#/components/responses/GameAPI'
     post:
-      summary: Get the API describtion of the game
+      summary: Get the API description of the game
       description: |
-        Retrieves the API describtion of the game
+        Retrieves the API description of the game
       responses:
         '200':
           $ref: '#/components/responses/GameAPI'
