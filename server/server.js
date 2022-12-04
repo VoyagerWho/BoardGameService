@@ -5,7 +5,7 @@ const session = require('express-session');
 const rooms = require('./routes/rooms');
 
 const sessionParser = session({
-	secret: process.env.sessionSecret,
+	secret: 'AveryB1GS3cr3t',
 	resave: false,
 	saveUninitialized: false,
 });
@@ -82,10 +82,24 @@ function logger(req, res, next) {
 	next();
 }
 
-const port = process.env.PORT || process.argv[2] || 80;
-var server = app.listen(port, () => {
-	customLog('App listening');
+// HTTPS version -> SSL cert works on localhost only
+const https = require('https');
+const fs = require('fs');
+const options = {
+	pfx: fs.readFileSync('server/CertLocalhost.pfx'),
+	passphrase: 'Cookie#1',
+};
+var server = https.createServer(options, app);
+server.listen(443, function () {
+	console.log('HTTPS Express server is up!');
+	console.log(server.address());
 });
+
+// HTTP version -> requires reverse-proxy
+
+// var server = app.listen(80, () => {
+// 	customLog('App listening');
+// });
 
 server.on('upgrade', (request, socket, head) => {
 	rooms.wsServer.handleUpgrade(request, socket, head, (socket) => {

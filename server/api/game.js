@@ -242,6 +242,8 @@ function getHttpsOptionsForGame(game) {
 			'Content-Length': 0,
 		},
 		timeout: 3000,
+		rejectUnauthorized: false,
+		strictSSL: false,
 	};
 	options.hostname = game.hostname;
 	options.port = game.port;
