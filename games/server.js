@@ -8,8 +8,6 @@ const games = {
 	Statki: require('./BattleshipsFiles/Battleships'),
 };
 const OpenApiValidator = require('express-openapi-validator');
-const https = require('https');
-const fs = require('fs');
 
 const rooms = new Map();
 
@@ -208,14 +206,13 @@ app.post('/:GameName/Status', (req, res) => {
 
 //-----------------------------------------------------------------------------
 
-const hostname = 'bgs-argen-game-server.herokuapp.com';
-const port = process.env.PORT || process.argv[2] || 8443;
-
+const hostname = process.env.HOSTNAME || 'localhost';
+const port = parseInt(process.env.PORT) || 9443;
 const description = {
 	TicTacToe: {
 		name: 'TicTacToe',
 		hostname: hostname,
-		port: 443,
+		port: port,
 		description: 'Dwuosobowa gra planszowa w kółko i krzyżyk',
 		maxNoPlayers: 2,
 		minNoPlayers: 2,
@@ -247,7 +244,7 @@ const description = {
 	ConnectFour: {
 		name: 'ConnectFour',
 		hostname: hostname,
-		port: 443,
+		port: port,
 		description: 'Cztero-osobowa gra planszowa w połącz 4 w linii',
 		maxNoPlayers: 4,
 		minNoPlayers: 2,
@@ -281,7 +278,7 @@ const description = {
 	ManDontGetAngry: {
 		name: 'ManDontGetAngry',
 		hostname: hostname,
-		port: 443,
+		port: port,
 		description: 'Cztero-osobowa gra planszowa w chińczyka',
 		maxNoPlayers: 4,
 		minNoPlayers: 2,
@@ -399,7 +396,7 @@ const description = {
 	BattleShips: {
 		name: 'BattleShips',
 		hostname: hostname,
-		port: 443,
+		port: port,
 		description: 'Dwuosobowa gra w statki',
 		maxNoPlayers: 2,
 		minNoPlayers: 2,
@@ -470,7 +467,20 @@ app.use((err, req, res, next) => {
 		message: err.message,
 	});
 });
-
-var server = app.listen(port, () => {
-	customLog('App listening');
+// HTTPS version -> SSL cert works on localhost only
+const https = require('https');
+const fs = require('fs');
+const options = {
+	pfx: fs.readFileSync('games/CertLocalhost.pfx'),
+	passphrase: 'Cookie#1',
+};
+var server = https.createServer(options, app);
+server.listen(443, hostname, function () {
+	console.log('HTTPS Express server is up!');
+	console.log(server.address());
 });
+
+// HTTP version -> requires reverse-proxy
+// var server = app.listen(80, () => {
+// 	customLog('App listening');
+// });
