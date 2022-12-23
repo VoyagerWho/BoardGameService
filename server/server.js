@@ -1,3 +1,5 @@
+//Development only!
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -94,12 +96,6 @@ server.listen(443, function () {
 	console.log('HTTPS Express server is up!');
 	console.log(server.address());
 });
-
-// HTTP version -> requires reverse-proxy
-
-// var server = app.listen(80, () => {
-// 	customLog('App listening');
-// });
 
 server.on('upgrade', (request, socket, head) => {
 	rooms.wsServer.handleUpgrade(request, socket, head, (socket) => {
