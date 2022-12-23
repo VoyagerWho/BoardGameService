@@ -205,9 +205,8 @@ app.post('/:GameName/Status', (req, res) => {
 });
 
 //-----------------------------------------------------------------------------
-
-const hostname = process.env.HOSTNAME || 'localhost';
-const port = parseInt(process.env.PORT) || 9443;
+const hostname = require('ip').address();
+const port = 443;
 const description = {
 	TicTacToe: {
 		name: 'TicTacToe',
@@ -475,7 +474,7 @@ const options = {
 	passphrase: 'Cookie#1',
 };
 var server = https.createServer(options, app);
-server.listen(443, hostname, function () {
+server.listen(port, hostname, function () {
 	console.log('HTTPS Express server is up!');
 	console.log(server.address());
 });
