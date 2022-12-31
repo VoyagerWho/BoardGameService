@@ -1,8 +1,6 @@
-const e = require('express');
-
 /**
  * Function to format log messages
- * @param {any} toLog
+ * @param {any} toLog - Value to print to console
  */
 function customLog(toLog) {
 	console.log('--------------------------------');
@@ -17,9 +15,9 @@ function customLog(toLog) {
 /**
  * @typedef State
  * @type {object}
- * @property {boolean} gameActive
- * @property {number} [playerWon]
- * @property {boolean} [draw]
+ * @property {boolean} gameActive - Flag whether game is active
+ * @property {number} [playerWon] - Id of the player who won last round
+ * @property {boolean} [draw] - Flag whether last round ended as a draw
  */
 
 /**
@@ -36,7 +34,7 @@ function customLog(toLog) {
 /**
  * Function to create new empty game instance for room
  * @param {number} [players=2] - Number of players
- * @returns {Room} game instance
+ * @returns {Room} Game instance
  */
 function openRoom(players) {
 	const board = new Array(9);
@@ -90,7 +88,7 @@ function startNewRound(room) {
  * Function to get current state of the game
  * @param {Room} room - Room instance
  * @param {number} playerId - Id of user { 0 - observer, >0 - players}
- * @returns {object} json representation of game state
+ * @returns {object} Representation of game state
  */
 function getUpdate(room, playerId) {
 	return {
@@ -104,8 +102,8 @@ function getUpdate(room, playerId) {
 
 /**
  * Function to return status of the room
- * @param {Room} room
- * @returns {{score: number[], state: State}}
+ * @param {Room} room - Room instance
+ * @returns {{score: number[], state: State}} Representation of game state
  */
 function getStatus(room) {
 	return {
@@ -117,7 +115,7 @@ function getStatus(room) {
 /**
  * Function to check if last move score victory
  * @param {Room} room - Room instance
- * @returns {boolean} true if player won, false otherwise
+ * @returns {boolean} True if player won, false otherwise
  */
 function checkIfWon(room) {
 	for (var x = 1; x < 7; ++x) {
@@ -172,7 +170,7 @@ function checkIfWon(room) {
 /**
  * Function to check if last move lead to draw
  * @param {Room} room - Room instance
- * @returns {boolean} true if draw, false otherwise
+ * @returns {boolean} True if draw, false otherwise
  */
 function checkIfDraw(room) {
 	if ([].concat(...room.board).indexOf(0) >= 0) return false;
@@ -184,7 +182,7 @@ function checkIfDraw(room) {
  * @param {Room} room - Room instance
  * @param {number} playerId - Player id number 1 or 2
  * @param {string} position - Move position example a1
- * @returns {boolean} true if move is legal, false otherwise
+ * @returns {boolean} True if move is legal, false otherwise
  */
 function makeMove(room, playerId, position) {
 	try {
@@ -219,6 +217,7 @@ function makeMove(room, playerId, position) {
  * @param {Room} room - Room instance
  * @param {number} playerId - Player id number 1 or 2
  * @param {string} position - Move position example a1
+ * @returns {boolean} True if move was accepted, false otherwise
  */
 function updateGame(room, playerId, position) {
 	if (makeMove(room, playerId, position)) {

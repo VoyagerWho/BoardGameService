@@ -155,14 +155,14 @@ components:
               x:
                 type: integer
                 minimum: 0
-              y:
+              'y':
                 type: integer
                 minimum: 0
               name:
                 type: string
             required:
               - x
-              - y
+              - 'y'
               - name
       required:
         - tileWidth
@@ -205,7 +205,7 @@ components:
           properties:
             name:
               type: string
-              pattern: '^(?:(?![<>]).)*$'
+              pattern: ^(?:(?![<>]).)*$
             hostname:
               type: string
               format: hostname
@@ -215,7 +215,7 @@ components:
               maximum: 65535
             description:
               type: string
-              pattern: '^(?:(?![<>]).)*$'
+              pattern: ^(?:(?![<>]).)*$
             minNoPlayers:
               type: integer
               minimum: 1
@@ -266,7 +266,6 @@ components:
           required:
             - name
             - hostname
-            - port
             - description
             - maxNoPlayers
             - functions
@@ -364,7 +363,6 @@ components:
         - score
         - state
         - message
-
   parameters:
     GameName:
       name: GameName
@@ -469,20 +467,37 @@ paths:
           description: Success
           content:
             image/png: {}
+  /static/{filename}:
+    parameters:
+      - name: filename
+        in: path
+        description: Name of the file
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Route for static files
+      description: Access for any static file outside API
+      responses:
+        '200':
+          description: Success
+          content:
+            text/css: {}
+            application/javascript: {}
   /{GameName}/api:
     parameters:
       - $ref: '#/components/parameters/GameName'
     get:
-      summary: Get the API describtion of the game
+      summary: Get the API description of the game
       description: |
-        Retrieves the API describtion of the game
+        Retrieves the API description of the game
       responses:
         '200':
           $ref: '#/components/responses/GameAPI'
     post:
-      summary: Get the API describtion of the game
+      summary: Get the API description of the game
       description: |
-        Retrieves the API describtion of the game
+        Retrieves the API description of the game
       responses:
         '200':
           $ref: '#/components/responses/GameAPI'

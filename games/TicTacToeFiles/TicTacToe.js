@@ -1,6 +1,6 @@
 /**
  * Function to format log messages
- * @param {any} toLog
+ * @param {any} toLog - Value to print to console
  */
 function customLog(toLog) {
 	console.log('--------------------------------');
@@ -15,9 +15,9 @@ function customLog(toLog) {
 /**
  * @typedef State
  * @type {object}
- * @property {boolean} gameActive
- * @property {number} [playerWon]
- * @property {boolean} [draw]
+ * @property {boolean} gameActive - Flag whether game is active
+ * @property {number} [playerWon] - Id of the player who won last round
+ * @property {boolean} [draw] - Flag whether last round ended as a draw
  */
 
 /**
@@ -33,39 +33,14 @@ function customLog(toLog) {
 /**
  * Function to create new empty game instance for room
  * @param {number} [players=2] - Number of players
- * @returns {Room} game instance
+ * @returns {Room} Game instance
  */
 function openRoom(players) {
 	return {
-		/**
-		 * Array representing game board
-		 * @type {Array<number>}
-		 */
 		board: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-
-		/**
-		 * Number representing last player
-		 * @type {number}
-		 */
 		player: 1,
-
-		/**
-		 * Number representing player who started last round
-		 * @type {number}
-		 */
 		playerBegin: 1,
-
-		/**
-		 * Array representing game score as
-		 * [ties, wins of player 1, wins of player 2]
-		 * @type {Array<number>}
-		 */
 		score: [0, 0, 0],
-
-		/**
-		 * Object representing state of the game
-		 * @type {JSON}
-		 */
 		state: { gameActive: false },
 	};
 }
@@ -73,6 +48,12 @@ function openRoom(players) {
 /**
  * Function to initialize new game
  * clearing previous' game status
+ */
+/**
+ * Function to initialize new game
+ * clearing previous' game status
+ * @param {Room} room - Room instance
+ * @param {number} players - Number of players
  */
 function startNewGame(room, players) {
 	room.board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -87,6 +68,7 @@ function startNewGame(room, players) {
 /**
  * Function to initialize new round
  * clearing previous' round status
+ * @param {Room} room - Room instance
  */
 function startNewRound(room) {
 	room.board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -98,8 +80,9 @@ function startNewRound(room) {
 }
 /**
  * Function to get current state of the game
+ * @param {Room} room - Room instance
  * @param {number} playerId - Id of user { 0 - observer, >0 - players}
- * @returns {object} json representation of game state
+ * @returns {object} Representation of game state
  */
 function getUpdate(room, playerId) {
 	return {
@@ -113,8 +96,8 @@ function getUpdate(room, playerId) {
 
 /**
  * Function to return status of the room
- * @param {Room} room
- * @returns {{score: number[], state: State}}
+ * @param {Room} room - Room instance
+ * @returns {{score: number[], state: State}} Representation of game state
  */
 function getStatus(room) {
 	return {
@@ -125,7 +108,8 @@ function getStatus(room) {
 
 /**
  * Function to check if last move score victory
- * @returns {boolean} true if player won, false otherwise
+ * @param {Room} room - Room instance
+ * @returns {boolean} True if player won, false otherwise
  */
 function checkIfWon(room) {
 	// 3 in row
@@ -167,7 +151,8 @@ function checkIfWon(room) {
 
 /**
  * Function to check if last move lead to draw
- * @returns {boolean} true if draw, false otherwise
+ * @param {Room} room - Room instance
+ * @returns {boolean} True if draw, false otherwise
  */
 function checkIfDraw(room) {
 	if (room.board.indexOf(0) >= 0) return false;
@@ -176,9 +161,10 @@ function checkIfDraw(room) {
 
 /**
  * Function to make next move by player
+ * @param {Room} room - Room instance
  * @param {number} playerId - Player id number 1 or 2
  * @param {string} position - Move position example a1
- * @returns {boolean} true if move is legal, false otherwise
+ * @returns {boolean} True if move is legal, false otherwise
  */
 function makeMove(room, playerId, position) {
 	try {
@@ -210,8 +196,10 @@ function makeMove(room, playerId, position) {
 
 /**
  * Function to update game state
+ * @param {Room} room - Room instance
  * @param {number} playerId - Player id number 1 or 2
  * @param {string} position - Move position example a1
+ * @returns {boolean} True if move was accepted, false otherwise
  */
 function updateGame(room, playerId, position) {
 	if (makeMove(room, playerId, position)) {

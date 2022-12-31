@@ -1,14 +1,19 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const path = require('path');
 const games = {
 	TicTacToe: require('./TicTacToeFiles/TicTacToe'),
 	ConnectFour: require('./ConnectFourFiles/ConnectFour'),
 	ManDontGetAngry: require('./ManDGAFiles/ManDGA'),
-	Statki: require('./BattleshipsFiles/Battleships'),
+	Battleships: require('./BattleshipsFiles/Battleships'),
 };
 const OpenApiValidator = require('express-openapi-validator');
 
+/**
+ * List of the room instances
+ * @type {Map<string, object>}
+ */
 const rooms = new Map();
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,6 +30,9 @@ app.use(
 
 /**
  * Middleware function for logging URL
+ * @param {express.Request} req - Incoming message
+ * @param {express.Response} res - Response
+ * @param {express.NextFunction} next - Next function to call
  */
 function logger(req, res, next) {
 	console.log('Path: ' + req.originalUrl);
@@ -33,7 +41,7 @@ function logger(req, res, next) {
 
 /**
  * Function to format log messages
- * @param {any} toLog
+ * @param {any} toLog - Value to print to console
  */
 function customLog(toLog) {
 	console.log('--------------------------------');
@@ -44,19 +52,20 @@ function customLog(toLog) {
 //-----------------------------------------------------------------------------
 // Game engine API
 //-----------------------------------------------------------------------------
+
 /**
  * @typedef RequestParameters
  * @type {object}
- * @property {boolean} valid
- * @property {string} gameName
- * @property {object} game
+ * @property {boolean} valid - Flag whether request is a valid one
+ * @property {string} gameName - Extrected name of the game
+ * @property {Game} game - Resolved game Class object
  */
 
 /**
- * First stage processing
- * @param {Request} req
- * @param {Response} res
- * @return {RequestParameters}
+ * First stage request processing
+ * @param {express.Request} req - Incoming message
+ * @param {express.Response} res - Response
+ * @return {RequestParameters} Processed request parameters
  */
 function processRequestBasic(req, res) {
 	const result = { valid: true };
@@ -72,18 +81,19 @@ function processRequestBasic(req, res) {
 /**
  * @typedef RequestParametersWithRoom
  * @type {object}
- * @property {boolean} valid
- * @property {string} gameName
- * @property {object} game
- * @property {string} rid
- * @property {string} roomName
- * @property {object} room
+ * @property {boolean} valid - Flag whether request is a valid one
+ * @property {string} gameName - Extrected name of the game
+ * @property {Game} game - Resolved game Class object
+ * @property {string} rid - Rxtracted name of the room instance
+ * @property {string} roomName - Formated room name
+ * @property {object} room - Request instance of the room
  */
 
 /**
- * @param {Request} req
- * @param {Response} res
- * @returns {RequestParametersWithRoom}
+ * Second stage request processing
+ * @param {express.Request} req - Incoming message
+ * @param {express.Response} res - Response
+ * @returns {RequestParametersWithRoom} Processed request parameters
  */
 function processRequestWithRoom(req, res) {
 	const result = processRequestBasic(req, res);
@@ -109,6 +119,8 @@ app.get('/', (req, res) => {
 app.get('/MDGABG', (req, res) => {
 	res.sendFile('MDGABG.png', { root: __dirname });
 });
+
+app.use('/static', express.static(path.join(__dirname, 'resources')));
 
 app.post('/:GameName/Open', (req, res) => {
 	const reqpar = processRequestBasic(req, res);
@@ -200,13 +212,27 @@ app.post('/:GameName/Status', (req, res) => {
 			...{ accepted: true, message: 'Room active' },
 			...data,
 		});
+		return;
 	}
 	res.json({ accepted: true, message: 'Server online!' });
 });
 
 //-----------------------------------------------------------------------------
+/**
+ * Address of the server
+ * @type {string}
+ */
 const hostname = require('ip').address();
+/**
+ * Port number of the seerver
+ * @type {number}
+ */
 const port = 443;
+
+/**
+ * List of the available games
+ * @type {API}
+ */
 const description = {
 	TicTacToe: {
 		name: 'TicTacToe',
@@ -392,8 +418,8 @@ const description = {
 			Close: '/ManDontGetAngry/Close',
 		},
 	},
-	BattleShips: {
-		name: 'BattleShips',
+	Battleships: {
+		name: 'Battleships',
 		hostname: hostname,
 		port: port,
 		description: 'Dwuosobowa gra w statki',
@@ -436,18 +462,23 @@ const description = {
 			},
 		],
 		functions: {
-			API: '/Statki/api',
-			NewGame: '/Statki/NewGame',
-			NewRound: '/Statki/NewRound',
-			Move: '/Statki/Move',
-			Update: '/Statki/Update',
-			Status: '/Statki/Status',
-			Open: '/Statki/Open',
-			Close: '/Statki/Close',
+			API: '/Battleships/api',
+			NewGame: '/Battleships/NewGame',
+			NewRound: '/Battleships/NewRound',
+			Move: '/Battleships/Move',
+			Update: '/Battleships/Update',
+			Status: '/Battleships/Status',
+			Open: '/Battleships/Open',
+			Close: '/Battleships/Close',
 		},
 	},
 };
 
+/**
+ * Function to handle API requests
+ * @param {express.Request} req - Incoming message
+ * @param {express.Response} res - Response
+ */
 function processApiRequest(req, res) {
 	if (!description[req.params.GameName]) {
 		res.json({ accepted: false, message: "Game doesn't exist!" });
@@ -458,8 +489,10 @@ function processApiRequest(req, res) {
 
 app.route('/:GameName/api').get(processApiRequest).post(processApiRequest);
 
+/**
+ * Error formatter
+ */
 app.use((err, req, res, next) => {
-	// format error
 	customLog(err);
 	res.status(err.status || 500).json({
 		accepted: false,
@@ -479,7 +512,7 @@ server.listen(port, hostname, function () {
 	console.log(server.address());
 });
 
-// HTTP version -> requires reverse-proxy
+// HTTP version -> requires reverse-proxy for HTTPS
 // var server = app.listen(80, () => {
 // 	customLog('App listening');
 // });

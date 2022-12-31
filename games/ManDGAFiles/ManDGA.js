@@ -18,7 +18,7 @@ const saveZones = [2, 6, 12, 16, 22, 26, 32, 36];
 
 /**
  * Function to format log messages
- * @param {any} toLog
+ * @param {any} toLog - Value to print to console
  */
 function customLog(toLog) {
 	console.log('--------------------------------');
@@ -33,9 +33,9 @@ function customLog(toLog) {
 /**
  * @typedef State
  * @type {object}
- * @property {boolean} gameActive
- * @property {number} [playerWon]
- * @property {boolean} [draw]
+ * @property {boolean} gameActive - Flag whether game is active
+ * @property {number} [playerWon] - Id of the player who won last round
+ * @property {boolean} [draw] - Flag whether last round ended as a draw
  */
 
 /**
@@ -57,7 +57,7 @@ function customLog(toLog) {
 /**
  * Function to create new empty game instance for room
  * @param {number} [players=2] - Number of players
- * @returns {Room} game instance
+ * @returns {Room} Game instance
  */
 function openRoom(players) {
 	return {
@@ -123,7 +123,7 @@ function startNewRound(room) {
  * Function to get current state of the game
  * @param {Room} room - Room instance
  * @param {number} playerId - Id of user { 0 - observer, >0 - players}
- * @returns {object} json representation of game state
+ * @returns {object} Representation of game state
  */
 function getUpdate(room, playerId) {
 	const board = room.board.concat(room.bases).concat(room.finishes);
@@ -138,8 +138,8 @@ function getUpdate(room, playerId) {
 
 /**
  * Function to return status of the room
- * @param {Room} room
- * @returns {{score: number[], state: State}}
+ * @param {Room} room - Room instance
+ * @returns {{score: number[], state: State}} Representation of game state
  */
 function getStatus(room) {
 	return {
@@ -151,7 +151,7 @@ function getStatus(room) {
 /**
  * Function to check if last move score victory
  * @param {Room} room - Room instance
- * @returns {boolean} true if player won, false otherwise
+ * @returns {boolean} True if player won, false otherwise
  */
 function checkIfWon(room) {
 	if (
@@ -163,10 +163,11 @@ function checkIfWon(room) {
 }
 
 /**
- *
- * @param {Room} room
- * @param {number} pos1
- * @param {number} pos2
+ * Function to check if proposed move is valid
+ * @param {Room} room - Room instance
+ * @param {number} pos1 - Starting position
+ * @param {number} pos2 - Ending position
+ * @returns {boolean} True if player can make the move, false otherwise
  */
 function canMove(room, pos1, pos2) {
 	if (pos1 && pos2) {
@@ -202,10 +203,10 @@ function canMove(room, pos1, pos2) {
 }
 
 /**
- *
- * @param {Room} room
- * @param {{type: string, id: number}[]} positions
- * @returns if can escape
+ * Function to check if player can escape the base
+ * @param {Room} room - Room instance
+ * @param {{type: string, id: number}[]} positions - Move data (starting and ending position)
+ * @returns True if player can exit the base, false otherwise
  */
 function exitBase(room, positions) {
 	if (positions[1].type !== 's' && positions[1].id !== startZones[room.player])
@@ -228,10 +229,10 @@ function exitBase(room, positions) {
 }
 
 /**
- *
- * @param {Room} room
- * @param {{type: string, id: number}[]} positions
- * @returns if can finish
+ * Function to check if player can enter finish zone
+ * @param {Room} room - Room instance
+ * @param {{type: string, id: number}[]} positions - Move data (starting and ending position)
+ * @returns True if player can enter finish zone, false otherwise
  */
 function enterFinish(room, positions) {
 	if (positions[1].id !== room.player) throw 'Incorrect Finish zone';
@@ -247,9 +248,9 @@ function enterFinish(room, positions) {
 }
 
 /**
- *
- * @param {Room} room
- * @param {number} player
+ * Function to handle take over of the pawn
+ * @param {Room} room - Room instance
+ * @param {number} player - Id of the player who takes over
  */
 function returnPawn(room, player) {
 	if (room.bases.slice(4 * (player - 1), 4 * player).indexOf(player) === -1)
@@ -258,10 +259,10 @@ function returnPawn(room, player) {
 }
 
 /**
- *
- * @param {Room} room
- * @param {number} rolled
- * @returns
+ * Function to handle dice throw
+ * @param {Room} room - Room instance
+ * @param {number} rolled - Rolled side of the dice
+ * @returns {boolean} True if player can make the move, false otherwise
  */
 function handleDiceThrow(room, rolled) {
 	--room.throws;
@@ -287,7 +288,7 @@ function handleDiceThrow(room, rolled) {
 			if (room.throws === 0) throw 'No move possible';
 		}
 	} catch (error) {
-		console.error(error);
+		console.log(error);
 	}
 
 	return false;
@@ -299,7 +300,7 @@ function handleDiceThrow(room, rolled) {
  * @param {number} playerId - Player id number 1 or 2
  * @param {string} move - Move position example
  * @param {number[][]} [dices] - List of dices rolls
- * @returns {boolean} true if move is legal, false otherwise
+ * @returns {boolean} True if move is legal, false otherwise
  */
 function makeMove(room, playerId, move, dices) {
 	try {
@@ -400,13 +401,10 @@ function makeMove(room, playerId, move, dices) {
  * @param {number} playerId - Player id number 1 or 2
  * @param {string} position - Move position example a1
  * @param {number[][]} [dices] - List of dices rolls
+ * @returns {boolean} True if move was accepted, false otherwise
  */
 function updateGame(room, playerId, position, dices) {
-	if (makeMove(room, playerId, position, dices)) {
-		return true;
-	} else {
-		return false;
-	}
+	return makeMove(room, playerId, position, dices);
 }
 
 module.exports.startNewGame = startNewGame;

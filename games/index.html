@@ -1,43 +1,22 @@
-<html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="/static/basicStyles.css" />
+    <title>Serwis logiki - testy jednostkowe API</title>
+    <script src="/static/basicScripts.js"></script>
+    <script src="/static/tests.js"></script>
+</head>
 
 <body style="background-color: #444; color: #aaa;">
-    Api
-    <form action="/tictactoe/api" method="post">
-        <input type="submit" />
-    </form>
-    Open
-    <form action="/tictactoe/Open" method="post">
-        <label for="room">Room: </label><input type="text" name="room" value="0" />
-        <input type="submit" />
-    </form>
-    NG
-    <form action="/tictactoe/NewGame" method="post">
-        <label for="room">Room: </label><input type="text" name="room" value="0" />
-        <input type="submit" />
-    </form>
-    NR
-    <form action="/tictactoe/NewRound" method="post">
-        <label for="room">Room: </label><input type="text" name="room" value="0" />
-        <input type="submit" />
-    </form>
-    Move
-    <form action="/tictactoe/Move" method="post">
-        <label for="room">Room: </label><input type="text" name="room" value="0" />
-        <label for="player">Player: </label><input type="number" name="player" value="1" />
-        <label for="move">Move: </label><input type="text" name="move" value="a1" />
-        <input type="submit" />
-    </form>
-    Update
-    <form action="/tictactoe/Update" method="post">
-        <label for="room">Room: </label><input type="text" name="room" value="0" />
-        <label for="player">Player: </label><input type="number" name="player" value="0" />
-        <input type="submit" />
-    </form>
-    Close
-    <form action="/tictactoe/Close" method="post">
-        <label for="room">Room: </label><input type="text" name="room" value="0" />
-        <input type="submit" />
-    </form>
+    <div>
+
+    </div>
+    <div id="TestResults">
+        <h1>Unit Tests Results</h1>
+        <button type="button" onclick="runTests()">Run Tests</button>
+    </div>
+    <div></div>
 </body>
 
 </html>

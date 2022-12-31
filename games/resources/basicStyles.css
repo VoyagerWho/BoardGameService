@@ -1,0 +1,184 @@
+body{
+    background-color: #404040;
+	background-image: linear-gradient(#404040 90%, black);
+	margin: 0;
+	padding: 0;
+	min-height: 100vh;
+	min-width: 1280px;
+	width: 100%;
+	color: #c0c0c0;
+    display: grid;
+	grid-template-columns: 20% 1fr 20%;
+}
+
+#backgroundBox{
+	width: 100%;
+	height: 100%;
+	max-height: 100%;
+	background-image: linear-gradient(90deg, rgba(0,0,0,0) 3%, peru 6%, peru 94%, rgba(0,0,0,0) 97%);
+}
+
+#foregroundBox{
+	margin: 0 5% 0;
+	background-color: #606060;
+	height: 100%;
+	max-height: 100%;
+	min-width: 640px;
+	text-align: center;
+}
+
+#pageHeader{
+	text-align: center;	
+}
+
+#pageHeader > h1{
+    color: black;
+	text-shadow: 2px 2px peru;
+}
+
+nav{
+	margin: 10px 10px;
+	padding: 10px 10px;
+	background-color: rgba(0,0,0,0.5);
+	border: 2px solid black;
+	height: 80vh;
+	min-width: 200px;
+	color: peru;
+	position: absolute;
+    top: 10px;
+    width: 15%;
+	font-size: large;
+	text-shadow: 1px 1px black, 2px 2px 2px peru;
+	font-weight: bold;
+	
+}
+
+#extras{
+	text-align: right;
+	margin: 10px 10px;
+	padding: 10px 10px;
+	min-width: 200px;
+	top: 30px;
+}
+
+#middle{
+	min-height: 50%;
+}
+
+
+h1 {
+    color: peru;
+}
+
+a {
+	color: peru;
+	text-decoration: none;
+}
+
+a > div {
+	padding: 4px;
+	margin: 8px;
+	border: 1px solid #606060;
+	border-radius: 8px;
+}
+
+button {
+	display: block;
+}
+
+canvas {
+	padding: 10px;
+}
+
+article{
+    background-color: #707070;
+    padding: 10px;
+}
+
+table{
+    border: 2px solid peru;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+td, th{
+    border: 1px solid black;
+    padding: 3px;
+    background-color: #606060;
+}
+
+form{
+    margin-top: 5px;
+	border: 2px solid peru;
+	border-radius: 8px;
+	padding: 8px;
+
+}
+
+form > h2 {
+	margin: 0;
+	margin-bottom: 4px;
+}
+
+footer{
+    margin-top: 5px;
+}
+
+.wideInput {
+	width: 400px;
+}
+
+.error {
+	color: yellow;
+	font-weight: bold;
+}
+
+button, input, select {
+	background-color: #404040;
+	border: 1px solid black;
+	color: #c0c0c0;
+}
+
+button, input[type=button], input[type=submit] {
+	display: inline-block;
+	text-align: center;
+	padding: 8px;
+	box-shadow: 4px 4px 4px #606060 inset, -4px -4px 4px #606060 inset;
+	transition-duration: 0.5s;
+}
+
+button:active,
+input[type=button]:active,
+input[type=submit]:active {
+	background-color: #20e20e;
+	box-shadow: 4px 4px 4px #404040 inset, -4px -4px 4px #404040 inset;
+}
+
+button:hover,
+input[type=button]:hover,
+input[type=submit]:hover {
+	border: 1px solid peru;
+}
+
+.testResCon {
+	background-color: #606060;
+	border:  1px solid black;
+}
+
+.testHead {
+	padding: 8px;
+}
+
+.testMess {
+	padding-left: 32px;
+	display:block;
+	white-space: pre;
+}
+
+.testPassed {
+	color: limegreen;
+}
+
+.testFailed {
+	color: peru;
+}
