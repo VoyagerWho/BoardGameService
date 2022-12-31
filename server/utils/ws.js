@@ -18,7 +18,7 @@ var sessionParser;
 
 /**
  * Function to pass main express session instance to router
- * @param {express.RequestHandler} sp
+ * @param {express.RequestHandler} sp - Session parser
  */
 function passSessionParser(sp) {
 	sessionParser = sp;
@@ -33,13 +33,17 @@ var rooms;
 
 /**
  * Function to pass main express session instance to router
- * @param {express.RequestHandler} sp
+ * @param {Map<string, object>} ref - Reference to list of the rooms
  */
 function passRooms(ref) {
 	rooms = ref;
 }
 module.exports.passRooms = passRooms;
 
+/**
+ * Function to format log messages
+ * @param {any} toLog - Value to print to console
+ */
 function customLog(toLog) {
 	console.log('--------------------------------');
 	console.log('WS:');
@@ -47,13 +51,17 @@ function customLog(toLog) {
 }
 
 //---------------------------------------------------------------------
+/**
+ * WebSocket Server
+ * @type {ws.Server}
+ */
 const wsServer = new ws.Server({ noServer: true });
 module.exports.wsServer = wsServer;
 
 /**
  * Function handling update of Users list for every room member
  * @param {String} rid - ID of room instance
- * @param {JSON} room - room instance to update
+ * @param {JSON} room - Room instance to update
  */
 function updateUsersList(rid, room, mode) {
 	room.players.forEach((player, index) => {
@@ -106,13 +114,13 @@ function updateUsersList(rid, room, mode) {
 
 /**
  * Handler for socket messages
- * @param {ws.WebSocket} socket
- * @param {IncomingMessage} req
- * @param {{action: string, move: string, roles: string[] }} messjson
+ * @param {ws.WebSocket} socket - WS connection
+ * @param {IncomingMessage} req - Request that initiated the connection
+ * @param {{action: string, move: string, roles: string[] }} messjson - Recived message
  */
 function handleMessage(socket, req, messjson) {
 	var resjson = { action: messjson.action };
-	const rid = req.url.substring(7);
+	const rid = decodeURI(req.url.substring(7));
 	const room = rooms.get(rid);
 	if (!room) {
 		customLog('Unknow Room ID: ' + rid);
@@ -397,7 +405,7 @@ wsServer.on('connection', (socket, req) => {
 	customLog('Socket conneted!');
 	sessionParser(req, {}, () => {
 		console.log('Session attached to socket');
-		const rid = req.url.substring(7);
+		const rid = decodeURI(req.url.substring(7));
 		const room = rooms.get(rid);
 		var resjson = { action: 'GetRole' };
 		if (room) {
@@ -473,43 +481,42 @@ wsServer.on('connection', (socket, req) => {
 					});
 			}
 			req.session.save();
+			console.log('Role assigned');
+			socket.send(JSON.stringify(resjson));
+			updateUsersList(rid, room);
+			socket.on('message', (message) => {
+				var messjson = {};
+				try {
+					messjson = JSON.parse(message.toString());
+				} catch (error) {
+					customLog(['Error on WS message', error, message.toString()]);
+					return;
+				}
+				customLog(messjson);
+				handleMessage(socket, req, messjson);
+			});
+
+			socket.on('close', (code, reason) => {
+				customLog(['Socket disconneted!', code, reason.toString()]);
+				const uid = req.session.rooms[rid].uid;
+				if (uid === 0) {
+					room.observers[req.session.rooms[rid].oid] = undefined;
+					--room.noObservers;
+				} else {
+					room.players[uid] = undefined;
+					--room.noPlayers;
+				}
+				if (req.session.rooms[rid].roomHost) {
+					room.host = false;
+					req.session.rooms[rid].roomHost = false;
+					req.session.save();
+				}
+				updateUsersList(rid, room, 'Left');
+			});
 		} else {
 			resjson.accepted = false;
 			resjson.response = 'Failed to assign the role';
 			resjson.resone = 'Incorrect room id: ' + rid;
 		}
-
-		console.log('Role assigned');
-		socket.send(JSON.stringify(resjson));
-		updateUsersList(rid, room);
-		socket.on('message', (message) => {
-			var messjson = {};
-			try {
-				messjson = JSON.parse(message.toString());
-			} catch (error) {
-				customLog(['Error on WS message', error, message.toString()]);
-				return;
-			}
-			customLog(messjson);
-			handleMessage(socket, req, messjson);
-		});
-
-		socket.on('close', (code, reason) => {
-			customLog(['Socket disconneted!', code, reason.toString()]);
-			const uid = req.session.rooms[rid].uid;
-			if (uid === 0) {
-				room.observers[req.session.rooms[rid].oid] = undefined;
-				--room.noObservers;
-			} else {
-				room.players[uid] = undefined;
-				--room.noPlayers;
-			}
-			if (req.session.rooms[rid].roomHost) {
-				room.host = false;
-				req.session.rooms[rid].roomHost = false;
-				req.session.save();
-			}
-			updateUsersList(rid, room, 'Left');
-		});
 	});
 });

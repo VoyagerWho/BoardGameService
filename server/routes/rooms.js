@@ -4,6 +4,10 @@ const router = express.Router();
 const gameAPI = require('../api/game');
 const WSHandler = require('../utils/ws');
 
+/**
+ * WebSocket Server
+ * @type {wsServer}
+ */
 const wsServer = WSHandler.wsServer;
 /**
  * App session instance
@@ -13,7 +17,7 @@ var sessionParser;
 
 /**
  * Function to pass main express session instance to router
- * @param {express.RequestHandler} sp
+ * @param {express.RequestHandler} sp - Session Parser
  */
 function passSessionParser(sp) {
 	sessionParser = sp;
@@ -21,6 +25,10 @@ function passSessionParser(sp) {
 	WSHandler.passSessionParser(sp);
 }
 
+/**
+ * Function to format log messages
+ * @param {any} toLog - Value to print to console
+ */
 function customLog(toLog) {
 	console.log('--------------------------------');
 	console.log('Room router:');
@@ -29,8 +37,8 @@ function customLog(toLog) {
 
 /**
  * Function to create empty room for game
- * @param {String} name
- * @param {*} game
+ * @param {String} name - Name of the new room
+ * @param {object} game - Api description of the game
  */
 function openRoom(name, game) {
 	var room = {
@@ -45,9 +53,18 @@ function openRoom(name, game) {
 	rooms.set(name, room);
 }
 
+/**
+ * List of the registered games
+ * @type {Map<string, object>}
+ */
 const games = new Map();
 
+/**
+ * List of the instances of rooms
+ * @type {Map<string, object>}
+ */
 const rooms = new Map();
+
 WSHandler.passRooms(rooms);
 //---------------------------------------------------------------------
 
@@ -262,7 +279,7 @@ router.post('/games/check', (req, res) => {
 	);
 });
 
-router.get('/games/check/:id', (req, res) => {
+router.post('/games/check/:id', (req, res) => {
 	const gameName = req.params.id;
 	const game = games.get(gameName);
 	if (game) {
@@ -365,6 +382,16 @@ router.post('/:id/Close', (req, res) => {
 						return;
 					}
 					if (resjson.accepted) {
+						room.players.forEach((p) => {
+							if (p) {
+								p.socket.close();
+							}
+						});
+						room.observers.forEach((o) => {
+							if (o) {
+								o.socket.close();
+							}
+						});
 						rooms.delete(rid);
 						res.render('index', {
 							text: 'Pokój zamknięty',
@@ -401,12 +428,6 @@ router.post('/:id/Close', (req, res) => {
 			games: games,
 		});
 });
-
-// // runs every time on param
-// router.param('id', (req, res, next, param) => {
-// 	customLog(['Param:', param]);
-// 	next();
-// });
 
 module.exports.router = router;
 module.exports.wsServer = wsServer;

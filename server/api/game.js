@@ -11,6 +11,10 @@ const exampleOptions = {
 	},
 };
 
+/**
+ * Function to format console output
+ * @param {any} toLog - Value to print
+ */
 function customLog(toLog) {
 	console.log('--------------------------------');
 	console.log('GameAPI:');
@@ -18,10 +22,10 @@ function customLog(toLog) {
 }
 
 /**
- * Helper function to calculate next side of rolling dice
- * @param {number} side
- * @param {number} turn
- * @returns Number of dots on current side
+ * Helper function to simulate real rotation of the dice
+ * @param {number} dices - Number of dices
+ * @param {number} rotations - Number of rotations per dice
+ * @returns {number[][]} Number of dots per rotation per dice
  */
 function rollDices(dices, rotations) {
 	const result = [];
@@ -129,9 +133,9 @@ function rollDices(dices, rotations) {
 
 /**
  * Helper function to get dice rolls without any constraints
- * @param {number} dices - number of dices
- * @param {number} sides - number of sides on dice
- * @param {*} rotations - number of rolls of single dice
+ * @param {number} dices - Number of dices
+ * @param {number} sides - Number of sides on dice
+ * @param {number} rotations - Number of rolls of single dice
  * @returns {number[][]} List of drawn sides
  */
 function genRandom(dices, sides, rotations) {
@@ -151,16 +155,16 @@ function genRandom(dices, sides, rotations) {
 /**
  * @typedef DiceSimulatorDescription
  * @type {object}
- * @property {boolean} real - wheter to use real 6 faced dice or arbitrary one
- * @property {number} [numberOfSides=6] - how many sides a single dice have (ommited if real = true)
- * @property {number} numberOfDices - how many dices are used at once
- * @property {number} [rotations=1] - number of rolls of single dice (useful for animations)
+ * @property {boolean} real - Wheter to use real 6 faced dice or arbitrary one
+ * @property {number} [numberOfSides=6] - How many sides a single dice have (ommited if real = true)
+ * @property {number} numberOfDices - How many dices are used at once
+ * @property {number} [rotations=1] - Number of rolls of single dice (useful for animations)
  */
 
 /**
  * Function to simulate throw of dices
- * @param {DiceSimulatorDescription} desc - describption of the dice throw simulator
- * @returns {number[][]} list of dices sides shown after roling
+ * @param {DiceSimulatorDescription} desc - Describption of the dice throw simulator
+ * @returns {number[][]} List of dices sides shown after roling
  */
 function throwDices(desc) {
 	const rotations = desc.rotations || 1;
@@ -170,7 +174,8 @@ function throwDices(desc) {
 
 /**
  * Helper function to process state based on uid
- * @param {JSON} state - game state object
+ * @param {JSON} state - Game state object
+ * @returns {object} - processed game state
  */
 function processGameState(state, uid) {
 	console.log(['processGameState', state]);
@@ -199,10 +204,10 @@ function processGameState(state, uid) {
 
 /**
  * Function to send https request
- * @param {string | URL | https.RequestOptions} options
- * @param {*} data
- * @param {(res: https.IncomingMessage) => void} responseHandler
- * @param {(err: Error) => void} errorHandler
+ * @param {string | URL | https.RequestOptions} options - Http request options
+ * @param {string} data - Message
+ * @param {(res: https.IncomingMessage) => void} responseHandler - Function to run on response
+ * @param {(err: Error) => void} [errorHandler] - Function to run after error
  */
 function httpsRequest(options, data, responseHandler, errorHandler) {
 	if (!errorHandler)
@@ -230,8 +235,8 @@ function httpsRequest(options, data, responseHandler, errorHandler) {
  *       'Content-Length': 0
  * }
  *
- * @param {JSON} game - game api description
- * @returns {https.RequestOptions}
+ * @param {JSON} game - Game api description
+ * @returns {https.RequestOptions} Options of the request
  */
 function getHttpsOptionsForGame(game) {
 	var options = {
@@ -244,80 +249,88 @@ function getHttpsOptionsForGame(game) {
 		timeout: 3000,
 	};
 	options.hostname = game.hostname;
-	options.port = game.port;
+	options.port = game.port || 443;
 	return options;
 }
 
 /**
  * Function handling command `NewGame`
- * @param {JSON} game - game api description
- * @param {JSON} data - data to send
- * @param {(res: https.IncomingMessage) => void} responseHandler
- * @param {(err: Error) => void} errorHandler
+ * @param {JSON} game - Game api description
+ * @param {JSON} data - Data to send
+ * @param {(res: https.IncomingMessage) => void} responseHandler- Function to run on response
+ * @param {(err: Error) => void} [errorHandler] - Function to run after error
  */
 const startNewGame = (game, data, responseHandler, errorHandler) =>
 	sendCommand('NewGame', game, data, responseHandler, errorHandler);
 
 /**
  * Function handling command `NewRound`
- * @param {JSON} game - game api description
- * @param {JSON} data - data to send
- * @param {(res: https.IncomingMessage) => void} responseHandler
- * @param {(err: Error) => void} errorHandler
+ * @param {JSON} game - Game api description
+ * @param {JSON} data - Data to send
+ * @param {(res: https.IncomingMessage) => void} responseHandler- Function to run on response
+ * @param {(err: Error) => void} [errorHandler] - Function to run after error
  */
 const startNewRound = (game, data, responseHandler, errorHandler) =>
 	sendCommand('NewRound', game, data, responseHandler, errorHandler);
 
 /**
  * Function handling command `Move`
- * @param {JSON} game - game api description
- * @param {JSON} data - data to send
- * @param {(res: https.IncomingMessage) => void} responseHandler
- * @param {(err: Error) => void} errorHandler
+ * @param {JSON} game - Game api description
+ * @param {JSON} data - Data to send
+ * @param {(res: https.IncomingMessage) => void} responseHandler- Function to run on response
+ * @param {(err: Error) => void} [errorHandler] - Function to run after error
  */
 const makeMove = (game, data, responseHandler, errorHandler) =>
 	sendCommand('Move', game, data, responseHandler, errorHandler);
 
 /**
  * Function handling command `Update`
- * @param {JSON} game - game api description
- * @param {JSON} data - data to send
- * @param {(res: https.IncomingMessage) => void} responseHandler
- * @param {(err: Error) => void} errorHandler
+ * @param {JSON} game - Game api description
+ * @param {JSON} data - Data to send
+ * @param {(res: https.IncomingMessage) => void} responseHandler- Function to run on response
+ * @param {(err: Error) => void} [errorHandler] - Function to run after error
  */
 const update = (game, data, responseHandler, errorHandler) =>
 	sendCommand('Update', game, data, responseHandler, errorHandler);
 
 /**
  * Function handling command `Status`
- * @param {JSON} game - game api description
- * @param {JSON} data - data to send
- * @param {(res: https.IncomingMessage) => void} responseHandler
- * @param {(err: Error) => void} errorHandler
+ * @param {JSON} game - Game api description
+ * @param {JSON} data - Data to send
+ * @param {(res: https.IncomingMessage) => void} responseHandler- Function to run on response
+ * @param {(err: Error) => void} [errorHandler] - Function to run after error
  */
 const status = (game, data, responseHandler, errorHandler) =>
 	sendCommand('Status', game, data, responseHandler, errorHandler);
 
 /**
  * Function handling command `Open`
- * @param {JSON} game - game api description
- * @param {JSON} data - data to send
- * @param {(res: https.IncomingMessage) => void} responseHandler
- * @param {(err: Error) => void} errorHandler
+ * @param {JSON} game - Game api description
+ * @param {JSON} data - Data to send
+ * @param {(res: https.IncomingMessage) => void} responseHandler- Function to run on response
+ * @param {(err: Error) => void} [errorHandler] - Function to run after error
  */
 const open = (game, data, responseHandler, errorHandler) =>
 	sendCommand('Open', game, data, responseHandler, errorHandler);
 
 /**
  * Function handling command `Close`
- * @param {JSON} game - game api description
- * @param {JSON} data - data to send
- * @param {(res: https.IncomingMessage) => void} responseHandler
- * @param {(err: Error) => void} errorHandler
+ * @param {JSON} game - Game api description
+ * @param {JSON} data - Data to send
+ * @param {(res: https.IncomingMessage) => void} responseHandler- Function to run on response
+ * @param {(err: Error) => void} [errorHandler] - Function to run after error
  */
 const close = (game, data, responseHandler, errorHandler) =>
 	sendCommand('Close', game, data, responseHandler, errorHandler);
 
+/**
+ * Function to call interface function
+ * @param {string} command - Function to call
+ * @param {JSON} game - Game api description
+ * @param {JSON} data - Data to send
+ * @param {(res: https.IncomingMessage) => void} responseHandler- Function to run on response
+ * @param {(err: Error) => void} [errorHandler] - Function to run after error
+ */
 function sendCommand(command, game, data, responseHandler, errorHandler) {
 	var options = getHttpsOptionsForGame(game);
 	options.path = game.functions[command];
@@ -332,7 +345,7 @@ function sendCommand(command, game, data, responseHandler, errorHandler) {
 /**
  * Function handling update of GUI for every room member
  * @param {String} rid - ID of room instance
- * @param {JSON} room - room instance to update
+ * @param {JSON} room - Room instance to update
  */
 function updateAll(rid, room) {
 	var options = getHttpsOptionsForGame(room.game);

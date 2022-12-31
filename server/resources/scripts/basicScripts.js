@@ -20,9 +20,9 @@ function getRequestObject() {
 
 /**
  * Function to send AJAX request via post method
- * @param {string} strURL
- * @param {string} mess
- * @param {Function} respFunc
+ * @param {string} strURL - Request address
+ * @param {string} mess - Message data
+ * @param {Function} respFunc - Handle function to run on response
  */
 function xmlhttpPost(strURL, mess, respFunc) {
 	var xhr = getRequestObject();
@@ -47,7 +47,7 @@ function xmlhttpPost(strURL, mess, respFunc) {
 
 /**
  * Function to send game api validation request
- * @param {html.form} form
+ * @param {html.form} form - Initiator
  */
 function checkGame(form) {
 	xmlhttpPost('/games/check', { url: form.url.value }, function (response) {
@@ -63,8 +63,8 @@ function checkGame(form) {
 }
 
 /**
- * Function to send game api validation request
- * @param {html.form} form
+ * Function to send game status validation request
+ * @param {html.form} form - Initiator
  */
 function checkStatus(form, name) {
 	xmlhttpPost('/games/check/' + name, {}, function (response) {

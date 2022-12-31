@@ -1,3 +1,7 @@
+/**
+ * Websocket connection with main server
+ * @type {WebSocket}
+ */
 var socket = new WebSocket(
 	'wss://' + document.location.host + document.location.pathname,
 	null,
@@ -80,13 +84,25 @@ socket.onerror = function (error) {
 	console.log(`${error.message}`);
 };
 
+/**
+ * Function to send move request through WS
+ * @param {string} move - Move data
+ * @param {number} board - Board id to move on
+ */
 function makeMove(move, board) {
 	socket.send(JSON.stringify({ action: 'Move', move: move, board: board }));
 }
+
+/**
+ * Function to send update request through WS
+ */
 function update() {
 	socket.send(JSON.stringify({ action: 'Update' }));
 }
 
+/**
+ * Function to initialize handlers
+ */
 function onBodyLoad() {
 	setup();
 }

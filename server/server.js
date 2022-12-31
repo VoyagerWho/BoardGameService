@@ -1,18 +1,27 @@
-//Development only!
+//Local network only!
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const rooms = require('./routes/rooms');
 
+/**
+ * Express session parser
+ * @type {express.RequestHandler}
+ */
 const sessionParser = session({
 	secret: 'AveryB1GS3cr3t',
 	resave: false,
 	saveUninitialized: false,
 });
 
-var app = express();
+/**
+ * Express app instance
+ * @type {Express}
+ */
+const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use('/static', express.static(path.join(__dirname, 'resources')));
@@ -28,7 +37,134 @@ app.use('/games', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-	res.render('index', { text: ' Strona Domowa' });
+	res.render('index', { middle: 'summary', text: 'Strona Domowa' });
+});
+
+app.route('/tests').get((req, res) => {
+	const { status } = require('./api/game');
+	status(
+		{
+			hostname: 'localhost',
+			functions: {
+				Status: '/tests/0',
+			},
+		},
+		null,
+		(rres) => {
+			rres.on('data', (d) => {
+				var resjson = {};
+				try {
+					resjson = JSON.parse(d.toString());
+				} catch (error) {
+					customLog(['Test 1 failed', d.toString()]);
+					return;
+				}
+				if (resjson.accepted) {
+					customLog(['Test 1 passed', resjson.message]);
+				} else {
+					customLog(['Test 1 failed', resjson.message]);
+				}
+			});
+		},
+		(err) => {
+			customLog(['Test 1 failed', err.message]);
+		}
+	);
+	status(
+		{
+			hostname: 'localhost',
+			functions: {
+				Status: '/tests/1',
+			},
+		},
+		null,
+		(rres) => {
+			rres.on('data', (d) => {
+				var resjson = {};
+				try {
+					resjson = JSON.parse(d.toString());
+				} catch (error) {
+					customLog(['Test 2 failed', d.toString()]);
+					return;
+				}
+				if (resjson.accepted) {
+					customLog(['Test 2 failed', resjson.message]);
+				} else {
+					customLog(['Test 2 passed', resjson.message]);
+				}
+			});
+		},
+		(err) => {
+			customLog(['Test 2 failed', err.message]);
+		}
+	);
+	status(
+		{
+			hostname: 'localhost',
+			functions: {
+				Status: '/tests/2',
+			},
+		},
+		null,
+		(rres) => {
+			rres.on('data', (d) => {
+				var resjson = {};
+				try {
+					resjson = JSON.parse(d.toString());
+				} catch (error) {
+					customLog(['Test 3 passed', d.toString()]);
+					return;
+				}
+				if (resjson.accepted) {
+					customLog(['Test 3 failed', resjson.message]);
+				} else {
+					customLog(['Test 3 failed', resjson.message]);
+				}
+			});
+		},
+		(err) => {
+			customLog(['Test 3 failed', err.message]);
+		}
+	);
+	status(
+		{
+			hostname: 'xlocalhost',
+			functions: {
+				Status: '/tests/0',
+			},
+		},
+		null,
+		(rres) => {
+			rres.on('data', (d) => {
+				var resjson = {};
+				try {
+					resjson = JSON.parse(d.toString());
+				} catch (error) {
+					customLog(['Test 4 failed', d.toString()]);
+					return;
+				}
+				if (resjson.accepted) {
+					customLog(['Test 4 failed', resjson.message]);
+				} else {
+					customLog(['Test 4 failed', resjson.message]);
+				}
+			});
+		},
+		(err) => {
+			customLog(['Test 4 passed', err.message]);
+		}
+	);
+
+	res.render('index', { middle: 'tests', text: 'Testy interfejsu' });
+});
+
+app.post('/tests/:n', (req, res) => {
+	const responses = [
+		{ accepted: true, message: 'Żądanie zaaceptowane' },
+		{ accepted: false, message: 'Żądanie niezaaceptowane' },
+		'Odpowiedź nieprawodłowa',
+	];
+	res.send(responses[req.params.n]);
 });
 
 app
@@ -73,18 +209,28 @@ app.use((req, res, next) => {
 	res.render('index', { text: '404', middle: 'error404' });
 });
 
+/**
+ * Function to format log messages
+ * @param {any} toLog - Value to print to console
+ */
 function customLog(toLog) {
 	console.log('--------------------------------');
 	console.log('Main server:');
 	console.log(toLog);
 }
 
+/**
+ * Middleware function for logging URL
+ * @param {express.Request} req - Incoming message
+ * @param {express.Response} res - Response
+ * @param {express.NextFunction} next - Next function to call
+ */
 function logger(req, res, next) {
 	console.log('\nURL: ' + req.originalUrl);
 	next();
 }
 
-// HTTPS version -> SSL cert works on localhost only
+// HTTPS version -> SSL cert works only on localhost
 const https = require('https');
 const fs = require('fs');
 const options = {
