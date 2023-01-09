@@ -499,7 +499,7 @@ app.use((err, req, res, next) => {
 		message: err.message,
 	});
 });
-// HTTPS version -> SSL cert works on localhost only
+// HTTPS version -> SSL cert works only on localhost
 const https = require('https');
 const fs = require('fs');
 const options = {
