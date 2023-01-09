@@ -1,12 +1,15 @@
 <div id="playersList">
-    <b>
-        <% if (locals.uid> 0) { %>
-            Jesteś Graczem <%= locals.uid %>
-                <% } else { %>
-                    Jesteś Obserwatorem
-                    <% } %>
-                        <br />Stan połączenia: <div id="wsIndicator" onclick="location.reload()"></div>
-    </b>
+    <div>
+        <b>
+            <% if (locals.uid> 0) { %>
+                Jesteś Graczem <%= locals.uid %>
+                    <% } else { %>
+                        Jesteś Obserwatorem
+                        <% } %>
+        </b>
+        <br /><b>Stan połączenia: </b>
+        <div id="wsIndicator" onclick="location.reload()"></div>
+    </div>
     <br /><br /><b>Członkowie:</b>
     <ul>
         <li>Gracze:
